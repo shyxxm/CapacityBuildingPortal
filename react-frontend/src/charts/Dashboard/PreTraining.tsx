@@ -85,7 +85,7 @@ export function App() {
           text: 'Sub-level Phases',
           font: {
             weight: 'bold',
-            size: 12,
+            size: 14,
           },
         },
         beginAtZero: true,
@@ -96,14 +96,15 @@ export function App() {
           text: 'Phase Completion Centre Count',
           font: {
             weight: 'bold',
-            size: 12,
+            size: 14,
           },
         },
         beginAtZero: true,
         ticks: {
           callback: function(value) {
             return Number(value).toFixed(0); // remove decimal points
-          }
+          },
+          stepSize:1
         }
       },
     },
