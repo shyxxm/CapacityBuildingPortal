@@ -9,6 +9,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { ChartOptions } from 'chart.js';
 
 ChartJS.register(
   CategoryScale,
@@ -19,25 +20,49 @@ ChartJS.register(
   Legend
 );
 
-const MNA = [0,80]; 
-const Training = [0,75]; 
-const Registration = [0,75]; 
-const Content = [0,60]; 
-const Resource = [0,8]; 
-const Research = [0,18]; 
-const TTT = [0,13]; 
-const SetUp = [0,100]; 
+const MNA = 8; 
+const Training = 7; 
+const Registration = 7; 
+const Content = 6; 
+const Resource = 8; 
+const Research = 1; 
+const TTT = 1; 
+const SetUp = 2;
 
-export const options = {
+export const options: ChartOptions<'bar'> = {
   responsive: true,
   plugins: {
     legend: {
-      position: 'top' as const,
-      display: false
+      position: 'top', // Ensured as a specific string literal
+      display: false,
     },
     title: {
       display: false,
       text: 'Chart.js Bar Chart',
+    },
+  },
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Sub-level Phases',
+        font: {
+          weight: 'bold',  // Make the label bold
+          size: 12,        // You can adjust the size as needed
+        },
+      },
+      beginAtZero: true,
+    },
+    y: {
+      title: {
+        display: true,
+        text: 'Phase Completion Centre Count',
+        font: {
+          weight: 'bold',  // Make the label bold
+          size: 12,        // You can adjust the size as needed
+        },
+      },
+      beginAtZero: true,
     },
   },
 };

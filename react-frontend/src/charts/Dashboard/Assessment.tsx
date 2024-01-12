@@ -9,6 +9,8 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { ChartOptions } from 'chart.js';
+
 
 ChartJS.register(
   CategoryScale,
@@ -25,16 +27,40 @@ const Project = [0,75];
 const Stipend = [0,60]; 
 const Certification = [0,8];  
 
-export const options = {
+export const options: ChartOptions<'bar'> = {
   responsive: true,
   plugins: {
     legend: {
-      position: 'top' as const,
-      display: false
+      position: 'top', // Ensured as a specific string literal
+      display: false,
     },
     title: {
       display: false,
       text: 'Chart.js Bar Chart',
+    },
+  },
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Sub-level Phases',
+        font: {
+          weight: 'bold',  // Make the label bold
+          size: 12,        // You can adjust the size as needed
+        },
+      },
+      beginAtZero: true,
+    },
+    y: {
+      title: {
+        display: true,
+        text: 'Phase Completion Centre Count',
+        font: {
+          weight: 'bold',  // Make the label bold
+          size: 12,        // You can adjust the size as needed
+        },
+      },
+      beginAtZero: true,
     },
   },
 };

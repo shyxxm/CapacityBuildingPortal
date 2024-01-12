@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
-import Header from "./Header"
-import Nav from "./NavBar"
+import Header from "../components/Header"
+import Nav from "../components/NavBar"
 
 function Forms(){
     return (
