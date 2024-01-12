@@ -20,45 +20,47 @@ ChartJS.register(
   Legend
 );
 
-const Business = [20]; 
-const Placement = [90]; 
-const FollowUp = [75];  
-
-// const tooltipLists = [
-//   ["Centre 1", "Centre 2", "Centre 3"],
-//   ["Centre 5", "Centre 2"],
-//   ["Centre 1", "Centre 2"],
-// ];
-
-
-  
+// const Business = [2]; 
+// const Placement = [9]; 
+// const FollowUp = [7];  
 
 export function App() {
   const [chartData, setchartData] = useState([{}]);
 
-  useEffect(() => {
+  // Define a function to fetch data
+  const fetchData = () => {
     fetch('/chart_data')
-      .then((res) => {
+      .then(res => {
         if (res.ok) {
           return res.json();
         } else {
           throw new Error('Server response not OK');
         }
       })
-      .then((chartData) => {
+      .then(chartData => {
         setchartData(chartData);
-        console.log(chartData);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error fetching data:', error);
       });
+  };
+
+  useEffect(() => {
+    // Call fetchData immediately on component mount
+    fetchData();
+
+    // Set up a periodic fetch
+    const intervalId = setInterval(fetchData, 500); // Fetch every 5000 milliseconds (5 seconds)
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
    const options: ChartOptions<'bar'> = {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top', // Ensured as a specific string literal
+        position: 'top',
         display: false,
       },
       title: {
@@ -68,12 +70,17 @@ export function App() {
       tooltip: {
         callbacks: {
           label: function(context) {
+            console.log(context)
             let labelIndex = context.dataIndex; // Index of the current bar
             let items = chartData[labelIndex]; // Get the list for the current bar
-            return items; // Return an array of strings (each string is a line in the tooltip)
+            if (Array.isArray(items)) {
+              return items; // Join the items with a newline
+            }
+            return ''; // Return an empty string if items is not an array
           }
         }
       },
+         
     },
     scales: {
       x: {
@@ -109,15 +116,16 @@ export function App() {
         {
           label: '', // Set label to an empty string
           data: [
-            Business,
-            Placement,
-            FollowUp
+            Array.isArray(chartData[0]) ? chartData[0].length : 0,
+            Array.isArray(chartData[1]) ? chartData[1].length : 0,
+            Array.isArray(chartData[2]) ? chartData[2].length : 0,
           ],
           backgroundColor: [
             'rgba(255, 99, 132, 0.5)',
             'rgba(54, 162, 235, 0.5)',
             'rgba(255, 206, 86, 0.5)'
           ],
+          barPercentage:0.9 //width of bar
         },
       ],
     };
