@@ -20,16 +20,12 @@ ChartJS.register(
   Legend
 );
 
-// const Business = [2]; 
-// const Placement = [9]; 
-// const FollowUp = [7];  
-
 export function App() {
   const [chartData, setchartData] = useState([{}]);
 
-  // Define a function to fetch data
+  // function to fetch data
   const fetchData = () => {
-    fetch('/chart_data')
+    fetch('/income_data')
       .then(res => {
         if (res.ok) {
           return res.json();
@@ -50,7 +46,7 @@ export function App() {
     fetchData();
 
     // Set up a periodic fetch
-    const intervalId = setInterval(fetchData, 500); // Fetch every 5000 milliseconds (5 seconds)
+    const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
 
     // Clear interval on component unmount
     return () => clearInterval(intervalId);
@@ -88,8 +84,8 @@ export function App() {
           display: true,
           text: 'Sub-level Phases',
           font: {
-            weight: 'bold',  // Make the label bold
-            size: 12,        // You can adjust the size as needed
+            weight: 'bold',
+            size: 12,
           },
         },
         beginAtZero: true,
@@ -99,11 +95,16 @@ export function App() {
           display: true,
           text: 'Phase Completion Centre Count',
           font: {
-            weight: 'bold',  // Make the label bold
-            size: 12,        // You can adjust the size as needed
+            weight: 'bold',
+            size: 12,
           },
         },
         beginAtZero: true,
+        ticks: {
+          callback: function(value) {
+            return Number(value).toFixed(0); // remove decimal points
+          }
+        }
       },
     },
   };
@@ -111,10 +112,10 @@ export function App() {
   const labels = ['Business Set-up', 'Placement Proofs', 'Follow-up Activity'];
   
    const data = {
-      labels , // Your categories
+      labels , // categories
       datasets: [
         {
-          label: '', // Set label to an empty string
+          label: '',
           data: [
             Array.isArray(chartData[0]) ? chartData[0].length : 0,
             Array.isArray(chartData[1]) ? chartData[1].length : 0,
