@@ -11,9 +11,9 @@ income_api = Blueprint('income_api', __name__)
 @preTraining_api.route('/preTraining_data')
 def preTraining_data():
     tooltip_data = [
-        ["Centre 1", "Centre 2","Centre 5"],
+        ["Centre 1", "Pre-Training","Ongoing","18/1/23","19/1/23"],
         ["Centre 2", "Centre 4","Centre 6"],
-        ["Centre 4", "Centre 6"],
+        ["Centre 4"],
         ["Centre 1", "Centre 6"],
         ["Centre 2", "Centre 2"],
         ["Centre 3", "Centre 6"],
@@ -27,7 +27,7 @@ def preTraining_data():
 def skillImplementation_Data():
     tooltip_data = [
         ["Centre 1", "Centre 2","Centre 5"],
-        ["Centre 2", "Centre 4","Centre 6"],
+        ["Centre 2"],
         ["Centre 4", "Centre 6"],
         ["Centre 1", "Centre 6"],
         ["Centre 2", "Centre 4"],

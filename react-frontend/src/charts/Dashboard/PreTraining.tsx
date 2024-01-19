@@ -42,13 +42,11 @@ export function App() {
   };
 
   useEffect(() => {
-    // Call fetchData immediately on component mount
     fetchData();
 
-    // Set up a periodic fetch
-    const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+    const intervalId = setInterval(fetchData, 5000); //Fetch data ever 5 secs
 
-    // Clear interval on component unmount
+    //Clear interval on component unmount
     return () => clearInterval(intervalId);
   }, []);
 
@@ -67,12 +65,12 @@ export function App() {
         callbacks: {
           label: function(context) {
             console.log(context)
-            let labelIndex = context.dataIndex; // Index of the current bar
-            let items = chartData[labelIndex]; // Get the list for the current bar
+            let labelIndex = context.dataIndex; //Index of the current bar
+            let items = chartData[labelIndex]; //Get the list for the current bar
             if (Array.isArray(items)) {
-              return items; // Join the items with a newline
+              return items; //join the items with a newline
             }
-            return ''; // Return an empty string if items is not an array
+            return ''; 
           }
         }
       },

@@ -6,7 +6,7 @@ app = Flask(__name__)
 # Sample Members API
 @app.route("/members")
 def members():
-    return {"members": ["Member1","Member2","Member3","Member4","Member5","Member6"]}
+    return {"members": ["Member1","Member2","Member3","Member4"]}
 
 # Chart Data API
 app.register_blueprint(income_api)  # Register the Blueprint

@@ -1,587 +1,465 @@
-import React, { useState, useEffect, Fragment } from 'react'
-import Header from "../components/Header"
-import Nav from "../components/NavBar"
-import {Link} from 'react-router-dom';
-import { App as BarChart } from '../charts/BarChart.tsx';
-import { App as HorizontalBarChart } from '../charts/HorizontalBarChart.tsx';
-import { App as AssessBar } from '../charts/Dashboard/Assessment.tsx';
-import { App as ImpleBar } from '../charts/Dashboard/Implementation.tsx';
-import { App as IncomeBar } from '../charts/Dashboard/Income.tsx';
-import { App as PreBar } from '../charts/Dashboard/PreTraining.tsx';
+import React, { useState, useEffect, Fragment } from "react";
+import Header from "../components/Header";
+import Nav from "../components/NavBar";
+import { Link } from "react-router-dom";
+import { App as BarChart } from "../charts/BarChart.tsx";
+import { App as HorizontalBarChart } from "../charts/HorizontalBarChart.tsx";
+import { App as AssessBar } from "../charts/Dashboard/Assessment.tsx";
+import { App as ImpleBar } from "../charts/Dashboard/Implementation.tsx";
+import { App as IncomeBar } from "../charts/Dashboard/Income.tsx";
+import { App as PreBar } from "../charts/Dashboard/PreTraining.tsx";
 
+import PreTraining from "../charts/Timeline/PreTraining.tsx";
+import ImpleTime from "../charts/Timeline/Implementation.tsx";
 
-function Dashboard(){
+import AgeDonut from "../charts/Donut/AgeDonut.tsx";
 
-    // State to store the selected phase
-    const [selectedPhase, setSelectedPhase] = useState(1);
+import PropTypes from "prop-types";
+import Box from "@mui/material/Box";
+import Collapse from "@mui/material/Collapse";
+import IconButton from "@mui/material/IconButton";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
-    // Handle change in dropdown
-    const handleSelectChange = (event) => {
-      setSelectedPhase(parseInt(event.target.value, 10));
-    };
-  
-    // Function to determine which BarChart to render
-    const renderBarChart = () => {
-      switch (selectedPhase) {
-        case 1:
-          return <PreBar />;
-        case 2:
-          return <ImpleBar />;
-        case 3:
-          return <AssessBar />;
-        case 4:
-          return <IncomeBar />;
-        default:
-          return <PreBar />;
-      }
-    };
-
-  return (
-<Fragment>
-<>
-  {/*  Body Wrapper */}
-  <div
-    className="page-wrapper"
-    id="main-wrapper"
-    data-layout="vertical"
-    data-navbarbg="skin6"
-    data-sidebartype="full"
-    data-sidebar-position="fixed"
-    data-header-position="fixed"
-  >
-    {/* Sidebar Start */}
-<Nav></Nav>
-    {/*  Sidebar End */}
-    {/*  Main wrapper */}
-    <div className="body-wrapper">
-      {/*  Header Start */}
-<Header></Header>
-      {/*  Header End */}
-      <div className="container-fluid">
-        {/*  Row 1 */}
-        <div className="row">
-          <div className="col-lg-6 d-flex align-items-strech">
-            <div className="card w-100">
-              <div className="card-body">
-                <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
-                  <div className="mb-3 mb-sm-0">
-                    <h5 className="card-title fw-semibold">Project Level Phase Status Overview</h5>
-                  </div>
-                  <div>
-                    <select className="form-select" onChange={handleSelectChange} >
-                      <option value={1}>Pre-Training</option>
-                      <option value={2}>Skill Implementation</option>
-                      <option value={3}>Assessment and Certification</option>
-                      <option value={4}>Income Generation</option>
-                    </select>
-                  </div>
-                </div>
-                {renderBarChart()}
-
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-6 d-flex align-items-strech">
-            <div className="card w-100">
-              <div className="card-body">
-                <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
-                  <div className="mb-3 mb-sm-0">
-                    <h5 className="card-title fw-semibold">Individual Centre Progress</h5>
-                  </div>
-                </div>
-                <HorizontalBarChart></HorizontalBarChart>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-lg-4 d-flex align-items-stretch">
-            <div className="card w-100">
-              <div className="card-body p-4">
-                <div className="mb-4">
-                  <h5 className="card-title fw-semibold">
-                    Recent Transactions
-                  </h5>
-                </div>
-                <ul className="timeline-widget mb-0 position-relative mb-n5">
-                  <li className="timeline-item d-flex position-relative overflow-hidden">
-                    <div className="timeline-time text-dark flex-shrink-0 text-end">
-                      09:30
-                    </div>
-                    <div className="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span className="timeline-badge border-2 border border-primary flex-shrink-0 my-8" />
-                      <span className="timeline-badge-border d-block flex-shrink-0" />
-                    </div>
-                    <div className="timeline-desc fs-3 text-dark mt-n1">
-                      Payment received from John Doe of $385.90
-                    </div>
-                  </li>
-                  <li className="timeline-item d-flex position-relative overflow-hidden">
-                    <div className="timeline-time text-dark flex-shrink-0 text-end">
-                      10:00 am
-                    </div>
-                    <div className="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span className="timeline-badge border-2 border border-info flex-shrink-0 my-8" />
-                      <span className="timeline-badge-border d-block flex-shrink-0" />
-                    </div>
-                    <div className="timeline-desc fs-3 text-dark mt-n1 fw-semibold">
-                      New sale recorded{" "}
-                      <a
-                        href="javascript:void(0)"
-                        className="text-primary d-block fw-normal"
-                      >
-                        #ML-3467
-                      </a>
-                    </div>
-                  </li>
-                  <li className="timeline-item d-flex position-relative overflow-hidden">
-                    <div className="timeline-time text-dark flex-shrink-0 text-end">
-                      12:00 am
-                    </div>
-                    <div className="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span className="timeline-badge border-2 border border-success flex-shrink-0 my-8" />
-                      <span className="timeline-badge-border d-block flex-shrink-0" />
-                    </div>
-                    <div className="timeline-desc fs-3 text-dark mt-n1">
-                      Payment was made of $64.95 to Michael
-                    </div>
-                  </li>
-                  <li className="timeline-item d-flex position-relative overflow-hidden">
-                    <div className="timeline-time text-dark flex-shrink-0 text-end">
-                      09:30 am
-                    </div>
-                    <div className="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span className="timeline-badge border-2 border border-warning flex-shrink-0 my-8" />
-                      <span className="timeline-badge-border d-block flex-shrink-0" />
-                    </div>
-                    <div className="timeline-desc fs-3 text-dark mt-n1 fw-semibold">
-                      New sale recorded{" "}
-                      <a
-                        href="javascript:void(0)"
-                        className="text-primary d-block fw-normal"
-                      >
-                        #ML-3467
-                      </a>
-                    </div>
-                  </li>
-                  <li className="timeline-item d-flex position-relative overflow-hidden">
-                    <div className="timeline-time text-dark flex-shrink-0 text-end">
-                      09:30 am
-                    </div>
-                    <div className="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span className="timeline-badge border-2 border border-danger flex-shrink-0 my-8" />
-                      <span className="timeline-badge-border d-block flex-shrink-0" />
-                    </div>
-                    <div className="timeline-desc fs-3 text-dark mt-n1 fw-semibold">
-                      New arrival recorded
-                    </div>
-                  </li>
-                  <li className="timeline-item d-flex position-relative overflow-hidden">
-                    <div className="timeline-time text-dark flex-shrink-0 text-end">
-                      12:00 am
-                    </div>
-                    <div className="timeline-badge-wrap d-flex flex-column align-items-center">
-                      <span className="timeline-badge border-2 border border-success flex-shrink-0 my-8" />
-                    </div>
-                    <div className="timeline-desc fs-3 text-dark mt-n1">
-                      Payment Done
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div className="col-lg-8 d-flex align-items-stretch">
-            <div className="card w-100">
-              <div className="card-body p-4">
-                <h5 className="card-title fw-semibold mb-4">
-                  Recent Transactions
-                </h5>
-                <div className="table-responsive">
-                  <table className="table text-nowrap mb-0 align-middle">
-                    <thead className="text-dark fs-4">
-                      <tr>
-                        <th className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0">Id</h6>
-                        </th>
-                        <th className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0">Assigned</h6>
-                        </th>
-                        <th className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0">Name</h6>
-                        </th>
-                        <th className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0">Priority</h6>
-                        </th>
-                        <th className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0">Budget</h6>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0">1</h6>
-                        </td>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-1">Sunil Joshi</h6>
-                          <span className="fw-normal">Web Designer</span>
-                        </td>
-                        <td className="border-bottom-0">
-                          <p className="mb-0 fw-normal">Elite Admin</p>
-                        </td>
-                        <td className="border-bottom-0">
-                          <div className="d-flex align-items-center gap-2">
-                            <span className="badge bg-primary rounded-3 fw-semibold">
-                              Low
-                            </span>
-                          </div>
-                        </td>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0 fs-4">$3.9</h6>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0">2</h6>
-                        </td>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-1">
-                            Andrew McDownland
-                          </h6>
-                          <span className="fw-normal">Project Manager</span>
-                        </td>
-                        <td className="border-bottom-0">
-                          <p className="mb-0 fw-normal">Real Homes WP Theme</p>
-                        </td>
-                        <td className="border-bottom-0">
-                          <div className="d-flex align-items-center gap-2">
-                            <span className="badge bg-secondary rounded-3 fw-semibold">
-                              Medium
-                            </span>
-                          </div>
-                        </td>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0 fs-4">$24.5k</h6>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0">3</h6>
-                        </td>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-1">
-                            Christopher Jamil
-                          </h6>
-                          <span className="fw-normal">Project Manager</span>
-                        </td>
-                        <td className="border-bottom-0">
-                          <p className="mb-0 fw-normal">MedicalPro WP Theme</p>
-                        </td>
-                        <td className="border-bottom-0">
-                          <div className="d-flex align-items-center gap-2">
-                            <span className="badge bg-danger rounded-3 fw-semibold">
-                              High
-                            </span>
-                          </div>
-                        </td>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0 fs-4">$12.8k</h6>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0">4</h6>
-                        </td>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-1">Nirav Joshi</h6>
-                          <span className="fw-normal">Frontend Engineer</span>
-                        </td>
-                        <td className="border-bottom-0">
-                          <p className="mb-0 fw-normal">Hosting Press HTML</p>
-                        </td>
-                        <td className="border-bottom-0">
-                          <div className="d-flex align-items-center gap-2">
-                            <span className="badge bg-success rounded-3 fw-semibold">
-                              Critical
-                            </span>
-                          </div>
-                        </td>
-                        <td className="border-bottom-0">
-                          <h6 className="fw-semibold mb-0 fs-4">$2.4k</h6>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-sm-6 col-xl-3">
-            <div className="card overflow-hidden rounded-2">
-              <div className="position-relative">
-                <a href="javascript:void(0)">
-                  <img
-                    src="../assets/images/products/s4.jpg"
-                    className="card-img-top rounded-0"
-                    alt="..."
-                  />
-                </a>
-                <a
-                  href="javascript:void(0)"
-                  className="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="top"
-                  data-bs-title="Add To Cart"
-                >
-                  <i className="ti ti-basket fs-4" />
-                </a>{" "}
-              </div>
-              <div className="card-body pt-3 p-4">
-                <h6 className="fw-semibold fs-4">Boat Headphone</h6>
-                <div className="d-flex align-items-center justify-content-between">
-                  <h6 className="fw-semibold fs-4 mb-0">
-                    $50{" "}
-                    <span className="ms-2 fw-normal text-muted fs-3">
-                      <del>$65</del>
-                    </span>
-                  </h6>
-                  <ul className="list-unstyled d-flex align-items-center mb-0">
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-sm-6 col-xl-3">
-            <div className="card overflow-hidden rounded-2">
-              <div className="position-relative">
-                <a href="javascript:void(0)">
-                  <img
-                    src="../assets/images/products/s5.jpg"
-                    className="card-img-top rounded-0"
-                    alt="..."
-                  />
-                </a>
-                <a
-                  href="javascript:void(0)"
-                  className="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="top"
-                  data-bs-title="Add To Cart"
-                >
-                  <i className="ti ti-basket fs-4" />
-                </a>{" "}
-              </div>
-              <div className="card-body pt-3 p-4">
-                <h6 className="fw-semibold fs-4">MacBook Air Pro</h6>
-                <div className="d-flex align-items-center justify-content-between">
-                  <h6 className="fw-semibold fs-4 mb-0">
-                    $650{" "}
-                    <span className="ms-2 fw-normal text-muted fs-3">
-                      <del>$900</del>
-                    </span>
-                  </h6>
-                  <ul className="list-unstyled d-flex align-items-center mb-0">
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-sm-6 col-xl-3">
-            <div className="card overflow-hidden rounded-2">
-              <div className="position-relative">
-                <a href="javascript:void(0)">
-                  <img
-                    src="../assets/images/products/s7.jpg"
-                    className="card-img-top rounded-0"
-                    alt="..."
-                  />
-                </a>
-                <a
-                  href="javascript:void(0)"
-                  className="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="top"
-                  data-bs-title="Add To Cart"
-                >
-                  <i className="ti ti-basket fs-4" />
-                </a>{" "}
-              </div>
-              <div className="card-body pt-3 p-4">
-                <h6 className="fw-semibold fs-4">Red Valvet Dress</h6>
-                <div className="d-flex align-items-center justify-content-between">
-                  <h6 className="fw-semibold fs-4 mb-0">
-                    $150{" "}
-                    <span className="ms-2 fw-normal text-muted fs-3">
-                      <del>$200</del>
-                    </span>
-                  </h6>
-                  <ul className="list-unstyled d-flex align-items-center mb-0">
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-sm-6 col-xl-3">
-            <div className="card overflow-hidden rounded-2">
-              <div className="position-relative">
-                <a href="javascript:void(0)">
-                  <img
-                    src="../assets/images/products/s11.jpg"
-                    className="card-img-top rounded-0"
-                    alt="..."
-                  />
-                </a>
-                <a
-                  href="javascript:void(0)"
-                  className="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="top"
-                  data-bs-title="Add To Cart"
-                >
-                  <i className="ti ti-basket fs-4" />
-                </a>{" "}
-              </div>
-              <div className="card-body pt-3 p-4">
-                <h6 className="fw-semibold fs-4">Cute Soft Teddybear</h6>
-                <div className="d-flex align-items-center justify-content-between">
-                  <h6 className="fw-semibold fs-4 mb-0">
-                    $285{" "}
-                    <span className="ms-2 fw-normal text-muted fs-3">
-                      <del>$345</del>
-                    </span>
-                  </h6>
-                  <ul className="list-unstyled d-flex align-items-center mb-0">
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="me-1" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                    <li>
-                      <a className="" href="javascript:void(0)">
-                        <i className="ti ti-star text-warning" />
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="py-6 px-6 text-center">
-          <p className="mb-0 fs-4">
-            Design and Developed by{" "}
-            <a
-              href="https://adminmart.com/"
-              target="_blank"
-              className="pe-1 text-primary text-decoration-underline"
-            >
-              AdminMart.com
-            </a>{" "}
-            Distributed by <a href="https://themewagon.com">ThemeWagon</a>
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</>
-
-</Fragment>
-
-
-  )
+function createData(name, calories, fat, carbs, protein, price) {
+  return {
+    name,
+    calories,
+    fat,
+    carbs,
+    protein,
+    price,
+    history: [
+      {
+        date: "2020-01-05",
+        customerId: "11091700",
+        amount: 3,
+      },
+      {
+        date: "2020-01-02",
+        customerId: "Anonymous",
+        amount: 1,
+      },
+    ],
+  };
 }
 
-export default Dashboard
+function Row(props) {
+  const { row } = props;
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <React.Fragment>
+      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell component="th" scope="row">
+          {row.name}
+        </TableCell>
+        <TableCell align="right">{row.calories}</TableCell>
+        <TableCell align="right">{row.fat}</TableCell>
+        <TableCell align="right">{row.carbs}</TableCell>
+        <TableCell align="right">{row.protein}</TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <Typography
+                align="center"
+                variant="h6"
+                gutterBottom
+                component="div"
+              >
+                Pre-Training
+              </Typography>
+              <Table size="small" aria-label="purchases">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Mobilization and Needs Assessment</TableCell>
+                    <TableCell>Pre-Training</TableCell>
+                    <TableCell>Registration</TableCell>
+                    <TableCell>Content Development </TableCell>
+                    <TableCell>Resource Allocation</TableCell>
+                    <TableCell>Research</TableCell>
+                    <TableCell>TTT</TableCell>
+                    <TableCell>Center Set up</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.history.map((historyRow) => (
+                    <TableRow key={historyRow.date}>
+                      <TableCell component="th" scope="row">
+                        Ongoing
+                      </TableCell>
+                      <TableCell>Ongoing</TableCell>
+                      <TableCell>Ongoing</TableCell>
+                      <TableCell>Not Started</TableCell>
+                      <TableCell component="th" scope="row">
+                        Completed
+                      </TableCell>
+                      <TableCell>Completed</TableCell>
+                      <TableCell>Completed</TableCell>
+                      <TableCell>Completed</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+            <Box sx={{ margin: 1 }}>
+              <Typography
+                align="center"
+                variant="h6"
+                gutterBottom
+                component="div"
+              >
+                Skill Implementation
+              </Typography>
+              <Table size="small" aria-label="purchases">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Enrollment</TableCell>
+                    <TableCell>Attendance</TableCell>
+                    <TableCell>Curriculum Progress</TableCell>
+                    <TableCell>Monitoring</TableCell>
+                    <TableCell>Events</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.history.map((historyRow) => (
+                    <TableRow key={historyRow.date}>
+                      <TableCell component="th" scope="row">
+                        {historyRow.date}
+                      </TableCell>
+                      <TableCell>{historyRow.customerId}</TableCell>
+                      <TableCell>{historyRow.amount}</TableCell>
+                      <TableCell>
+                        {Math.round(historyRow.amount * row.price * 100) / 100}
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        {historyRow.date}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+            <Box sx={{ margin: 1 }}>
+              <Typography
+                align="center"
+                variant="h6"
+                gutterBottom
+                component="div"
+              >
+                Asessment and Certification
+              </Typography>
+              <Table size="small" aria-label="purchases">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Inspection</TableCell>
+                    <TableCell>Internal Assessment</TableCell>
+                    <TableCell>Project Assessment</TableCell>
+                    <TableCell>Stipend Distribution</TableCell>
+                    <TableCell>Certification</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.history.map((historyRow) => (
+                    <TableRow key={historyRow.date}>
+                      <TableCell component="th" scope="row">
+                        {historyRow.date}
+                      </TableCell>
+                      <TableCell>{historyRow.customerId}</TableCell>
+                      <TableCell>{historyRow.amount}</TableCell>
+                      <TableCell>
+                        {Math.round(historyRow.amount * row.price * 100) / 100}
+                      </TableCell>
+                      <TableCell component="th" scope="row">
+                        {historyRow.date}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+            <Box sx={{ margin: 1 }}>
+              <Typography
+                align="center"
+                variant="h6"
+                gutterBottom
+                component="div"
+              >
+                Income Generation
+              </Typography>
+              <Table size="small" aria-label="purchases">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Business Set-up</TableCell>
+                    <TableCell>Placement Proofs</TableCell>
+                    <TableCell>Follow-up activity</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.history.map((historyRow) => (
+                    <TableRow key={historyRow.date}>
+                      <TableCell>{historyRow.date}</TableCell>
+                      <TableCell>{historyRow.customerId}</TableCell>
+                      <TableCell>{historyRow.amount}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
+  );
+}
+
+Row.propTypes = {
+  row: PropTypes.shape({
+    calories: PropTypes.number.isRequired,
+    carbs: PropTypes.number.isRequired,
+    fat: PropTypes.number.isRequired,
+    history: PropTypes.arrayOf(
+      PropTypes.shape({
+        amount: PropTypes.number.isRequired,
+        customerId: PropTypes.string.isRequired,
+        date: PropTypes.string.isRequired,
+      })
+    ).isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    protein: PropTypes.number.isRequired,
+  }).isRequired,
+};
+
+const rows = [
+  createData("Center 1", 6.0, 6.0, 24, 4.0, 3.99),
+  createData("Center 2", 237, 9.0, 37, 4.3, 4.99),
+  createData("Center 3", 262, 16.0, 24, 6.0, 3.79),
+  createData("Center 4", 305, 3.7, 67, 4.3, 2.5),
+  createData("Center 5", 356, 16.0, 49, 3.9, 1.5),
+];
+
+function Dashboard() {
+  // State to store the selected phase
+  const [selectedPhase, setSelectedPhase] = useState(1);
+
+  // Handle change in dropdown
+  const handleSelectChange = (event) => {
+    setSelectedPhase(parseInt(event.target.value, 10));
+  };
+
+  // Function to determine which BarChart to render
+  const renderBarChart = () => {
+    switch (selectedPhase) {
+      case 1:
+        return <PreBar />;
+      case 2:
+        return <ImpleBar />;
+      case 3:
+        return <AssessBar />;
+      case 4:
+        return <IncomeBar />;
+      default:
+        return <PreBar />;
+    }
+  };
+
+  // State to store the selected phase
+  const [selectedGanttPhase, setSelectedGanttPhase] = useState(1);
+
+  // Handle change in dropdown
+  const handleSelectChangeinGantt = (event) => {
+    setSelectedGanttPhase(parseInt(event.target.value, 10));
+  };
+
+  // Function to determine which BarChart to render
+  const renderGanttChart = () => {
+    switch (selectedGanttPhase) {
+      case 1:
+        return <PreTraining />;
+      case 2:
+        return <ImpleTime />;
+      case 3:
+        return <PreTraining />;
+      case 4:
+        return <PreTraining />;
+      default:
+        return <PreTraining />;
+    }
+  };
+
+  return (
+    <Fragment>
+      <>
+        {/*  Body Wrapper */}
+        <div
+          className="page-wrapper"
+          id="main-wrapper"
+          data-layout="vertical"
+          data-navbarbg="skin6"
+          data-sidebartype="full"
+          data-sidebar-position="fixed"
+          data-header-position="fixed"
+        >
+          {/* Sidebar Start */}
+          <Nav></Nav>
+          {/*  Sidebar End */}
+          {/*  Main wrapper */}
+          <div className="body-wrapper">
+            {/*  Header Start */}
+            <Header></Header>
+            {/*  Header End */}
+            <div className="container-fluid">
+              {/*  Row 1 */}
+              <div className="row">
+                <div className="col-lg-6 d-flex align-items-strech">
+                  <div className="card w-100">
+                    <div className="card-body">
+                      <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                        <div className="mb-3 mb-sm-0">
+                          <h5 className="card-title fw-semibold">
+                            Project Level Phase Status Overview
+                          </h5>
+                        </div>
+                        <div>
+                          <select
+                            className="form-select"
+                            onChange={handleSelectChange}
+                          >
+                            <option value={1}>Pre-Training</option>
+                            <option value={2}>Skill Implementation</option>
+                            <option value={3}>
+                              Assessment and Certification
+                            </option>
+                            <option value={4}>Income Generation</option>
+                          </select>
+                        </div>
+                      </div>
+                      {renderBarChart()}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-lg-6 d-flex align-items-strech">
+                  <div className="card w-100">
+                    <div className="card-body">
+                      <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                        <div className="mb-3 mb-sm-0">
+                          <h5 className="card-title fw-semibold">
+                            Stage / Pace of Each Center
+                          </h5>
+                        </div>
+                        <div>
+                          <select
+                            className="form-select"
+                            onChange={handleSelectChangeinGantt}
+                          >
+                            <option value={1}>Pre-Training</option>
+                            <option value={2}>Skill Implementation</option>
+                            <option value={3}>
+                              Assessment and Certification
+                            </option>
+                            <option value={4}>Income Generation</option>
+                          </select>
+                        </div>
+                      </div>
+                      {renderGanttChart()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-lg-12 d-flex align-items-strech">
+                  <div className="card w-100">
+                    <div className="card-body">
+                      <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                        <div className="mb-3 mb-sm-0">
+                          <h5 className="card-title fw-semibold">
+                            Individual Centre Progress
+                          </h5>
+                        </div>
+                      </div>
+                      <TableContainer component={Paper}>
+                        <Table aria-label="collapsible table">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell />
+                              {/* <TableCell>Dessert (100g serving)</TableCell> */}
+                              <TableCell>Center Name</TableCell>
+                              <TableCell align="right">Pre-Training</TableCell>
+                              <TableCell align="right">
+                                Skill Implementaion
+                              </TableCell>
+                              <TableCell align="right">
+                                Assessment & Certification
+                              </TableCell>
+                              <TableCell align="right">
+                                Income Generation
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {rows.map((row) => (
+                              <Row align="right" key={row.name} row={row} />
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="row">
+                <div className="card w-100">
+                  <div className="card-body">
+                    <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                      <div className="mb-3 mb-sm-0">
+                        <h5 className="card-title fw-semibold">
+                          Impact-Based Dashboard
+                        </h5>
+                      </div>
+                    </div>
+                    <AgeDonut />
+                  </div>
+                </div>
+              </div>
+              <div className="py-6 px-6 text-center">
+                <p className="mb-0 fs-4">
+                  Design and Developed by{" "}
+                  <a
+                    href="https://adminmart.com/"
+                    target="_blank"
+                    className="pe-1 text-primary text-decoration-underline"
+                  >
+                    AdminMart.com
+                  </a>{" "}
+                  Distributed by <a href="https://themewagon.com">ThemeWagon</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    </Fragment>
+  );
+}
+
+export default Dashboard;
