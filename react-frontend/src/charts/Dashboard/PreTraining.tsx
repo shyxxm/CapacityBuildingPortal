@@ -10,6 +10,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { ChartOptions } from 'chart.js';
+import axios from '../../services/axiosConfig.js';
 
 ChartJS.register(
   CategoryScale,
@@ -21,20 +22,14 @@ ChartJS.register(
 );
 
 export function App() {
-  const [chartData, setchartData] = useState([{}]);
+  const [chartData, setChartData] = useState([{}]);
 
-  // function to fetch data
+  // Function to fetch data
   const fetchData = () => {
-    fetch('/preTraining_data')
+    axios.get('/preTraining_data')
       .then(res => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error('Server response not OK');
-        }
-      })
-      .then(chartData => {
-        setchartData(chartData);
+        // Axios automatically handles JSON conversion
+        setChartData(res.data);
       })
       .catch(error => {
         console.error('Error fetching data:', error);
@@ -44,10 +39,14 @@ export function App() {
   useEffect(() => {
     // Call fetchData immediately on component mount
     fetchData();
+    const intervalId = setInterval(fetchData, 5000); // Fetch data every 5 secs
 
+<<<<<<< Updated upstream
     // Set up a periodic fetch
     const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
 
+=======
+>>>>>>> Stashed changes
     // Clear interval on component unmount
     return () => clearInterval(intervalId);
   }, []);

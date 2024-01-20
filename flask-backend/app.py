@@ -1,7 +1,10 @@
 from flask import Flask
 from DashboardApi.chart_api import income_api,preTraining_api,skillImplementation_api,assessment_api
+from flask_cors import CORS,cross_origin
 
 app = Flask(__name__)
+CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Sample Members API
 @app.route("/members")
