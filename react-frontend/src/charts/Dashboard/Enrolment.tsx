@@ -65,13 +65,7 @@ export function App() {
       tooltip: {
         callbacks: {
           label: function(context) {
-            console.log(context)
-            let labelIndex = context.dataIndex; //Index of the current bar
-            let items = chartData[labelIndex]; //Get the list for the current bar
-            if (Array.isArray(items)) {
-              return items; //join the items with a newline
-            }
-            return ''; 
+            return context.raw; // Directly return the data point value
           }
         }
       },
@@ -81,7 +75,7 @@ export function App() {
       x: {
         title: {
           display: true,
-          text: 'Sub-level Phases',
+          text: 'Courses Offered',
           font: {
             weight: 'bold',
             size: 14,
@@ -92,7 +86,7 @@ export function App() {
       y: {
         title: {
           display: true,
-          text: 'Phase Completion Centre Count',
+          text: 'Student Enrolment Count',
           font: {
             weight: 'bold',
             size: 14,
@@ -109,32 +103,20 @@ export function App() {
     },
   };
   
-  const labels = ['MNA', 'Pre-Training', 'Registration', 'Content Development', 'Resource Allocation', 'Research', 'TTT', 'Center Set-Up'];
+  const labels = ['Course A', 'Course B', 'Course C', 'Course D', 'Course E'];
   
    const data = {
       labels , // categories
       datasets: [
         {
           label: '',
-          data: [
-            Array.isArray(chartData[0]) ? chartData[0].length : 0,
-            Array.isArray(chartData[1]) ? chartData[1].length : 0,
-            Array.isArray(chartData[2]) ? chartData[2].length : 0,
-            Array.isArray(chartData[3]) ? chartData[3].length : 0,
-            Array.isArray(chartData[4]) ? chartData[4].length : 0,
-            Array.isArray(chartData[5]) ? chartData[5].length : 0,
-            Array.isArray(chartData[6]) ? chartData[6].length : 0,
-            Array.isArray(chartData[7]) ? chartData[7].length : 0,
-          ],
+          data:[65, 59, 80, 81, 56, 55, 40],
           backgroundColor: [
             'rgba(255, 99, 132, 0.5)',
             'rgba(54, 162, 235, 0.5)',
             'rgba(255, 206, 86, 0.5)',
             'rgba(75, 192, 192, 0.5)',
             'rgba(153, 102, 255, 0.5)',
-            'rgba(231, 76, 60, 0.5)',
-            'rgba(241, 196, 15, 0.5)',
-            'rgba(22, 160, 133, 0.5)'
           ],
           barPercentage:0.9 //width of bar
         },

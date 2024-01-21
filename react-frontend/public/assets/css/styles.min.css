@@ -16056,3 +16056,9 @@
  .timeline-widget .timeline-item .timeline-badge.badge-primary {
      border: 2px solid #5D87FF
  }
+ .chart-container {
+    height: 50vh; 
+  }
+  .chart-container2 {
+    height: 40vh;
+  }

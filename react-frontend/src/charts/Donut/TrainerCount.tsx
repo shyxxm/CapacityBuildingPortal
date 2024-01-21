@@ -6,13 +6,13 @@ class TrainerCountDonut extends React.Component<{}, { series: number[]; options:
         super(props);
 
         this.state = {
-            series: [10, 20, 10, 5],
+            series: [100, 60],
             options: {
                 chart: {
                     type: 'donut',
                 },
-                colors: ['#2E93fA', '#66DA26', '#546E7A', '#E91E63'],
-                labels: ['25-30', '30-45','45-60','60-75'],
+                colors: ['#2E93fA', '#546E7A'],
+                labels: ['Male Trainers', 'Female Trainers'],
                 dataLabels: {
                     enabled: true,
                     formatter: function (val, opts) {
@@ -45,7 +45,8 @@ class TrainerCountDonut extends React.Component<{}, { series: number[]; options:
                         options={this.state.options}
                         series={this.state.series}
                         type="donut" 
-                        height="160"
+                        height="350"
+                        width="350"
                     />
                 </div>
                 <div id="html-dist"></div>

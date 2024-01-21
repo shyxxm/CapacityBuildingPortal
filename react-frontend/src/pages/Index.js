@@ -13,6 +13,12 @@ import PreTraining from "../charts/Timeline/PreTraining.tsx";
 import ImpleTime from "../charts/Timeline/Implementation.tsx";
 
 import AgeDonut from "../charts/Donut/AgeDonut.tsx";
+import TrainerCountDonut from "../charts/Donut/TrainerCount.tsx";
+import GenderDonut from "../charts/Donut/GenderDonut.tsx";
+import TraineeCountDonut from "../charts/Donut/TraineeCountDonut.tsx";
+
+import GoogleMap from "../maps/GoogleMap.tsx";
+import { App as EnrolBar } from "../charts/Dashboard/Enrolment.tsx";
 
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
@@ -42,11 +48,6 @@ function createData(name, calories, fat, carbs, protein, price) {
         date: "2020-01-05",
         customerId: "11091700",
         amount: 3,
-      },
-      {
-        date: "2020-01-02",
-        customerId: "Anonymous",
-        amount: 1,
       },
     ],
   };
@@ -79,7 +80,7 @@ function Row(props) {
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
+            <Box sx={{ margin: 2 }}>
               <Typography
                 align="center"
                 variant="h6"
@@ -121,7 +122,7 @@ function Row(props) {
                 </TableBody>
               </Table>
             </Box>
-            <Box sx={{ margin: 1 }}>
+            <Box sx={{ margin: 3 }}>
               <Typography
                 align="center"
                 variant="h6"
@@ -159,7 +160,7 @@ function Row(props) {
                 </TableBody>
               </Table>
             </Box>
-            <Box sx={{ margin: 1 }}>
+            <Box sx={{ margin: 3 }}>
               <Typography
                 align="center"
                 variant="h6"
@@ -197,7 +198,7 @@ function Row(props) {
                 </TableBody>
               </Table>
             </Box>
-            <Box sx={{ margin: 1 }}>
+            <Box sx={{ margin: 3 }}>
               <Typography
                 align="center"
                 variant="h6"
@@ -354,7 +355,7 @@ function Dashboard() {
                           </select>
                         </div>
                       </div>
-                      {renderBarChart()}
+                      <div className="chart-container">{renderBarChart()}</div>
                     </div>
                   </div>
                 </div>
@@ -391,8 +392,8 @@ function Dashboard() {
                   <div className="card w-100">
                     <div className="card-body">
                       <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
-                        <div className="mb-3 mb-sm-0">
-                          <h5 className="card-title fw-semibold">
+                        <div className="mb-3 mb-sm-0 w-100 text-center">
+                          <h5 className="card-title fw-semibold fs-6">
                             Individual Centre Progress
                           </h5>
                         </div>
@@ -428,19 +429,97 @@ function Dashboard() {
                 </div>
               </div>
               <div className="row">
-                <div className="card w-100">
-                  <div className="card-body">
-                    <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
-                      <div className="mb-3 mb-sm-0">
-                        <h5 className="card-title fw-semibold">
-                          Impact-Based Dashboard
-                        </h5>
+                <div className="col-lg-12 d-flex align-items-strech">
+                  <div className="card w-100">
+                    <div className="card-body">
+                      <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                        <div className="mb-3 mb-sm-0">
+                          <h5 className="card-title fw-semibold">
+                            Impact-Based Dashboard
+                          </h5>
+                        </div>
+                      </div>
+
+                      <div className="row">
+                        <div className="col-md-3 d-flex">
+                          <div className="card flex-fill">
+                            <div className="card-body d-flex flex-column">
+                              <h5 className="text-center">Trainee Count</h5>
+                              <TraineeCountDonut />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="col-md-3 d-flex">
+                          <div className="card flex-fill">
+                            <div className="card-body d-flex flex-column">
+                              <h5 className="text-center">Age Distribution</h5>
+                              <AgeDonut />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="col-md-3 d-flex">
+                          <div className="card flex-fill">
+                            <div className="card-body d-flex flex-column">
+                              <h5 className="text-center">
+                                Gender Distribution
+                              </h5>
+                              <GenderDonut />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="col-md-3 d-flex">
+                          <div className="card flex-fill">
+                            <div className="card-body d-flex flex-column">
+                              <h5 className="text-center">Trainer Count</h5>
+                              <TrainerCountDonut />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <br></br>
+
+                      <div className="row">
+                        <div className="col-lg-6 d-flex align-items-strech">
+                          <div className="card w-100">
+                            <div className="card-body">
+                              <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                                <div className="mb-3 mb-sm-0">
+                                  <h5 className="card-title fw-semibold">
+                                    Geographical Distribution of Centers: 4
+                                  </h5>
+                                </div>
+                              </div>
+                              <GoogleMap />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="col-lg-6 d-flex align-items-strech">
+                          <div className="card w-100">
+                            <div className="card-body">
+                              <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                                <div className="mb-3 mb-sm-0">
+                                  <h5 className="card-title fw-semibold">
+                                    Course Enrolment
+                                  </h5>
+                                </div>
+                              </div>
+                              <div className="chart-container2">
+                                <EnrolBar />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <AgeDonut />
                   </div>
                 </div>
               </div>
+
               <div className="py-6 px-6 text-center">
                 <p className="mb-0 fs-4">
                   Design and Developed by{" "}
