@@ -45,9 +45,9 @@ function createData(name, calories, fat, carbs, protein, price) {
     price,
     history: [
       {
-        date: "2020-01-05",
-        customerId: "11091700",
-        amount: 3,
+        date: "Completed",
+        customerId: "Ongoing",
+        amount: "Not started",
       },
     ],
   };
@@ -106,11 +106,11 @@ function Row(props) {
                   {row.history.map((historyRow) => (
                     <TableRow key={historyRow.date}>
                       <TableCell component="th" scope="row">
-                        Ongoing
+                        Completed
                       </TableCell>
-                      <TableCell>Ongoing</TableCell>
-                      <TableCell>Ongoing</TableCell>
-                      <TableCell>Not Started</TableCell>
+                      <TableCell>Completed</TableCell>
+                      <TableCell>Completed</TableCell>
+                      <TableCell>Completed</TableCell>
                       <TableCell component="th" scope="row">
                         Completed
                       </TableCell>
@@ -149,9 +149,7 @@ function Row(props) {
                       </TableCell>
                       <TableCell>{historyRow.customerId}</TableCell>
                       <TableCell>{historyRow.amount}</TableCell>
-                      <TableCell>
-                        {Math.round(historyRow.amount * row.price * 100) / 100}
-                      </TableCell>
+                      <TableCell>Ongoing</TableCell>
                       <TableCell component="th" scope="row">
                         {historyRow.date}
                       </TableCell>
@@ -187,9 +185,7 @@ function Row(props) {
                       </TableCell>
                       <TableCell>{historyRow.customerId}</TableCell>
                       <TableCell>{historyRow.amount}</TableCell>
-                      <TableCell>
-                        {Math.round(historyRow.amount * row.price * 100) / 100}
-                      </TableCell>
+                      <TableCell>Not started</TableCell>
                       <TableCell component="th" scope="row">
                         {historyRow.date}
                       </TableCell>
@@ -252,11 +248,11 @@ Row.propTypes = {
 };
 
 const rows = [
-  createData("Center 1", 6.0, 6.0, 24, 4.0, 3.99),
-  createData("Center 2", 237, 9.0, 37, 4.3, 4.99),
-  createData("Center 3", 262, 16.0, 24, 6.0, 3.79),
-  createData("Center 4", 305, 3.7, 67, 4.3, 2.5),
-  createData("Center 5", 356, 16.0, 49, 3.9, 1.5),
+  createData("Center 1", "Completed", "Ongoing", "Ongoing", "Not Started"),
+  createData("Center 2", "Ongoing", "Ongoing", "Ongoing", "Ongoing"),
+  createData("Center 3", "Ongoing", "Ongoing", "Ongoing", "Ongoing"),
+  createData("Center 4", "Ongoing", "Ongoing", "Ongoing", "Ongoing"),
+  createData("Center 5", "Ongoing", "Ongoing", "Ongoing", "Ongoing"),
 ];
 
 function Dashboard() {
