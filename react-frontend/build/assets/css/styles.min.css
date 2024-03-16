@@ -309,6 +309,10 @@
  b, strong {
      font-weight: 700
  }
+ b, strong2 {
+    font-weight: 700;
+    font-size: 2em
+}
  .small, small {
      font-size: 0.875em
  }
@@ -16004,13 +16008,18 @@
      margin-bottom: 30px
  }
  .card-hover {
-     -webkit-transition: 0.2s ease-in;
-     transition: 0.2s ease-in
- }
- .card-hover:hover {
-     -webkit-transform: translate3d(0px, -5px, 0px);
-     transform: translate3d(0px, -5px, 0px)
- }
+    -webkit-transition: 0.2s ease-in;
+    transition: 0.2s ease-in;
+    /* Add transition for border color */
+    transition-property: transform, border-color;
+    border: 2px solid transparent; /* Default border, transparent to avoid layout shift */
+  }
+  
+  .card-hover:hover {
+    -webkit-transform: translate3d(0px, -5px, 0px);
+    transform: translate3d(0px, -5px, 0px);
+    border-color: #d56f0d; /* Example border color */
+  }
  .round-8 {
      width: 8px;
      height: 8px
@@ -16062,3 +16071,110 @@
   .chart-container2 {
     height: 40vh;
   }
+  .centered-container {
+    margin-top: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+  }
+  .header-text {
+        font-size: 20px;
+
+    margin-bottom: 40px;
+    white-space: normal;
+  }
+  .header-text2 {
+    font-size: 20px;
+
+margin-bottom: 60px;
+white-space: normal; 
+font-family: 'Trebuchet MS';
+}
+  
+  .normal-text {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+  }
+  .main-map {
+    width: 60%;
+    margin: 0 auto; 
+    margin-bottom: 7%;
+    transition: transform 0.3s ease-in-out; /* Apply transition to the main class */
+
+  }
+  .main-map3 {
+    width: 60%;
+    margin: 0 auto; 
+    margin-bottom: 7%;
+    transition: transform 0.3s ease-in-out; /* Apply transition to the main class */
+
+  }
+  .main-map2 {
+    width: 50%;
+
+    margin-top: 7%;
+    margin-bottom: -6%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .p2 {
+    font-size: 80px;
+    text-align: center;
+    color: black;
+    margin-top: 10%;
+    margin: 0;
+    line-height: 0;
+    font-family: 'Trebuchet MS';
+    white-space: nowrap;
+
+    &:nth-of-type(5){
+        color: yellow;
+    }
+  }
+
+  .text-wrapper2 {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap */
+    justify-content: center; /* Center items horizontally */
+    align-items: center; /* Center items vertically */
+  }
+
+/* Non-hover state */
+.glow-on-hover {
+    transition: box-shadow 0.3s ease-in-out;
+    box-shadow: var(--bs-card-box-shadow); /* Original shadow */
+  }
+  
+  /* Hover state */
+  .glow-on-hover:hover {
+    box-shadow: 
+      0 0 15px 5px rgba(255, 255, 255, 0.6), /* Glowing effect */
+      var(--bs-card-box-shadow); /* Original shadow */
+  }
+
+  .zoom-effect {
+    transform: scale(1.2); /* Adjust the scale value as needed */
+    transition: transform 0.3s ease-in-out; /* Smooth transition */
+  }
+  .mainpage-font{
+    font-size: 5rem;
+    color: #582442;
+    font-family: 'Trebuchet MS';
+  }
+  .mainpage-font2{
+    font-size: 5rem;
+    color: #d56f0d;
+    font-family: 'Trebuchet MS';
+  }
+  .centered-button {
+    margin-top: -1%;
+    display: flex;        /* Enables flexbox */
+    justify-content: center; /* Centers horizontally */
+    align-items: center;     /* Centers vertically */
+    width: 100%;
+
+  }
+  

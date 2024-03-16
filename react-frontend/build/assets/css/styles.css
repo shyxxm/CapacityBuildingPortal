@@ -16297,3 +16297,9 @@ ul {
   .chart-container2 {
     height: 40vh;
   }
+  .centered-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }

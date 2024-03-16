@@ -11,6 +11,8 @@ import {
 import { Bar } from 'react-chartjs-2';
 import { ChartOptions } from 'chart.js';
 
+import axios from '../../services/axiosConfig';
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -21,25 +23,37 @@ ChartJS.register(
 );
 
 export function App() {
-  const [chartData, setchartData] = useState([{}]);
+  const [chartData, setChartData] = useState([{}]);
 
-  // function to fetch data
-  const fetchData = () => {
-    fetch('/preTraining_data')
-      .then(res => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error('Server response not OK');
-        }
-      })
-      .then(chartData => {
-        setchartData(chartData);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  };
+  // // function to fetch data
+  // const fetchData = () => {
+  //   fetch('/preTraining_data')
+  //     .then(res => {
+  //       if (res.ok) {
+  //         return res.json();
+  //       } else {
+  //         throw new Error('Server response not OK');
+  //       }
+  //     })
+  //     .then(chartData => {
+  //       setchartData(chartData);
+  //     })
+  //     .catch(error => {
+  //       console.error('Error fetching data:', error);
+  //     });
+  // };
+
+    // Function to fetch data
+    const fetchData = () => {
+      axios.get('/preTraining_data')
+        .then(res => {
+          // Axios automatically handles JSON conversion
+          setChartData(res.data);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    };
 
   useEffect(() => {
     fetchData();

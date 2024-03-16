@@ -9,6 +9,9 @@ import Forms from "./pages/Forms";
 import Sample from "./pages/Sample";
 import Typography from "./pages/Typography";
 import Icon from "./pages/Icon";
+import Main from "./pages/Main";
+import CreateProject from "./pages/CreateProject";
+import ProjectDetails from "./pages/ProjectDetails";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
@@ -17,8 +20,10 @@ function App() {
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Main />} />
+          <Route path="/Dashboard" element={<Index />} />
           <Route path="/Login" element={<Login />} />
+          <Route path="/Main" element={<Main />} />
           <Route path="/Register" element={<Register />} />
           <Route path="/Buttons" element={<Buttons />} />
           <Route path="/Alerts" element={<Alerts />} />
@@ -27,6 +32,8 @@ function App() {
           <Route path="/Sample" element={<Sample />} />
           <Route path="/Typography" element={<Typography />} />
           <Route path="/Icon" element={<Icon />} />
+          <Route path="/CreateProject" element={<CreateProject />} />
+          <Route path="/ProjectDetails" element={<ProjectDetails />} />
         </Routes>
       </Router>
     </div>
