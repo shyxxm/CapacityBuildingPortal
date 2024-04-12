@@ -25,12 +25,12 @@ function Login(){
                   className="text-nowrap logo-img text-center d-block py-3 w-100"
                 >
                   <img
-                    src="../assets/images/logos/dark-logo.svg"
+                    src="../assets/images/logos/navbar.png"
                     width={180}
                     alt=""
                   />
                 </a>
-                <p className="text-center">Your Social Campaigns</p>
+                <p className="text-center">Your Monitoring Portal</p>
                 <form>
                   <div className="mb-3">
                     <label htmlFor="exampleInputEmail1" className="form-label">
@@ -72,17 +72,17 @@ function Login(){
                         Remeber this Device
                       </label>
                     </div>
-                    <a className="text-primary fw-bold" href="./index.html">
+                    {/* <a className="text-primary fw-bold" href="./index.html">
                       Forgot Password ?
-                    </a>
+                    </a> */}
                   </div>
                   <a
                     href="./index.html"
-                    className="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2"
+                    className="btn btn-danger w-100 py-8 fs-4 mb-4 rounded-2"
                   >
                     Sign In
                   </a>
-                  <div className="d-flex align-items-center justify-content-center">
+                  {/* <div className="d-flex align-items-center justify-content-center">
                     <p className="fs-4 mb-0 fw-bold">New to Modernize?</p>
                     <a
                       className="text-primary fw-bold ms-2"
@@ -90,7 +90,7 @@ function Login(){
                     >
                       Create an account
                     </a>
-                  </div>
+                  </div> */}
                 </form>
               </div>
             </div>
