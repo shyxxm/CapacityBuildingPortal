@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 import Header from "../components/Header";
 import Nav from "../components/NavBar";
+import { Link } from "react-router-dom";
 
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
@@ -9,20 +10,28 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 
 const names = ["Swamiji", "Swami P", "Swami AA", "Swami PVS", "Swami AG"];
 
 const okrs = ["OKR1", "OKR2", "OKR3"];
 
+const trainers = ["Shyam", "Prasad", "Aswathi"];
+
 const KPIs = ["KPI1", "KPI2", "KPI3"];
 
 const Progress = ["Red", "Yellow", "Green"];
 
-
+const okrsData = [
+  { okr: "OKR 1", date: "2024-04-01", quarterRange: "Apr - May" },
+  { okr: "OKR 2", date: "2024-07-01", quarterRange: "May - June" },
+  { okr: "OKR 3", date: "2024-10-01", quarterRange: "June - Sept" },
+  // Add more OKRs and their corresponding dates and quarter ranges
+];
 
 const handleNotificationClick = () => {
   // Add your functionality here
@@ -31,8 +40,7 @@ const handleNotificationClick = () => {
 };
 
 function ProjectDetails() {
-  const [selectedYear, setSelectedYear] = React.useState(null);
-  // const formattedDate = selectedYear ? dayjs(selectedYear).format("YYYY") : "";
+  const [todayDate, settodayDate] = React.useState(dayjs());
 
   const [projectName, setProjectName] = React.useState("");
 
@@ -41,9 +49,29 @@ function ProjectDetails() {
   };
 
   const [selectedOKR, setselectedOKR] = React.useState("");
+  const [okrDate, setOkrDate] = React.useState("");
+  const [okrQuarterRange, setOkrQuarterRange] = React.useState("");
 
   const handleOkrChange = (event) => {
-    setselectedOKR(event.target.value);
+    const selectedOKR = event.target.value;
+    setselectedOKR(selectedOKR);
+
+    // Find the corresponding OKR data
+    const selectedOKRData = okrsData.find((okr) => okr.okr === selectedOKR);
+    if (selectedOKRData) {
+      setOkrDate(selectedOKRData.date);
+      setOkrQuarterRange(selectedOKRData.quarterRange);
+    } else {
+      // If no corresponding data found, set defaults or clear the fields
+      setOkrDate(""); // Set default OKR date
+      setOkrQuarterRange(""); // Set default OKR quarter range
+    }
+  };
+
+  const [trainer, setTrainer] = React.useState("");
+
+  const handleTrainerChange = (event) => {
+    setTrainer(event.target.value);
   };
 
   const [selectedKPI, setselectedKPI] = React.useState("");
@@ -55,7 +83,25 @@ function ProjectDetails() {
   const [selectedProgress, setselectedProgress] = React.useState("");
 
   const handleKPIProgressChange = (event) => {
-    setselectedKPI(event.target.value);
+    setselectedProgress(event.target.value);
+  };
+
+  const [projectUpdate, setprojectUpdate] = React.useState("");
+
+  const handleProjectUpdate = (event) => {
+    setprojectUpdate(event.target.value);
+  };
+
+  const handleSubmit = () => {
+    const formData = {
+      projectName: projectName,
+      OKR: selectedOKR,
+      KPI: selectedKPI,
+      date: todayDate,
+      name: trainer,
+      update: projectUpdate,
+    };
+    console.log("Submitted data:", formData);
   };
 
   return (
@@ -93,8 +139,6 @@ function ProjectDetails() {
                             Project Name
                           </InputLabel>
                           <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
                             value={projectName}
                             label="Project Name"
                             onChange={handleChange}
@@ -129,9 +173,9 @@ function ProjectDetails() {
                           onChange={handleOkrChange}
                           sx={{ width: 200 }}
                         >
-                          {okrs.map((okrs) => (
-                            <MenuItem key={okrs} value={okrs}>
-                              {okrs}
+                          {okrsData.map((okrData) => (
+                            <MenuItem key={okrData.okr} value={okrData.okr}>
+                              {okrData.okr}
                             </MenuItem>
                           ))}
                         </Select>
@@ -142,21 +186,21 @@ function ProjectDetails() {
                           id="outlined-required"
                           label="OKR Date"
                           color="secondary"
-                          name="projectName"
+                          name="okrDate"
+                          value={okrDate}
                           sx={{ width: 230 }} // Adjust the width as needed
                         />
                       </div>
                       <div style={{ marginLeft: "48px" }}>
-
-                      <TextField
+                        <TextField
                           id="outlined-required"
                           label="OKR Quarter Range"
                           color="secondary"
-                          name="projectName"
+                          name="okrQuarterRange"
+                          value={okrQuarterRange}
                           sx={{ width: 230 }} // Adjust the width as needed
                         />
-                                              </div>
-
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -185,35 +229,83 @@ function ProjectDetails() {
                           ))}
                         </Select>
                       </FormControl>
-                      <div style={{ marginLeft:48 }}>
-                      <FormControl sx={{ mt: 1 }}>
-                        <InputLabel id="demo-simple-select-label">
-                          Progress
-                        </InputLabel>
-                        <Select
-                          labelId="demo-simple-select-label"
-                          id="demo-simple-select"
-                          value={selectedProgress}
-                          label="Progress"
-                          onChange={handleKPIProgressChange}
-                          sx={{ width: 200 }}
-                        >
-                          {Progress.map((Progress) => (
-                            <MenuItem key={Progress} value={Progress}>
-                              {Progress}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <div style={{ marginLeft: 48 }}>
+                        <FormControl sx={{ mt: 1 }}>
+                          <InputLabel id="demo-simple-select-label">
+                            Progress
+                          </InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={selectedProgress}
+                            label="Progress"
+                            onChange={handleKPIProgressChange}
+                            sx={{ width: 200 }}
+                          >
+                            {Progress.map((Progress) => (
+                              <MenuItem key={Progress} value={Progress}>
+                                {Progress}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       </div>
-
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DemoContainer components={['DatePicker']}>
-                          <DatePicker label="KPI date" />
-                        </DemoContainer>
-                      </LocalizationProvider>
+                      <div style={{ marginLeft: 70 }}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DemoContainer components={["DatePicker"]}>
+                            <DatePicker
+                              label="KPI date"
+                              value={todayDate}
+                              onChange={(newValue) => settodayDate(newValue)}
+                            />
+                          </DemoContainer>
+                        </LocalizationProvider>
+                      </div>
                     </div>
                   </div>
+                </div>
+                <div className="card">
+                  <div className="card-body">
+                    <h5 className="card-title fw-semibold mb-4">
+                      Quarter Update
+                    </h5>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <TextField
+                        required
+                        id="outlined"
+                        label="Reported By"
+                        defaultValue=""
+                        name="trainerName"
+                        value={trainer}
+                        onInput={handleTrainerChange}
+                        sx={{ width: 300 }} // Adjust the width as needed
+                      />
+
+                      <div style={{ marginLeft: "48px" }}>
+                        <TextField
+                          id="outlined-required-multiline-flexible"
+                          label="Project Update"
+                          multiline
+                          maxRows={4}
+                          name="projectUpdate"
+                          value={projectUpdate}
+                          onInput={handleProjectUpdate}
+                          sx={{ width: 540 }} // Adjust the width as needed
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="centered-button" style={{ marginTop: 40 }}>
+                  <Link to="/dashboard">
+                    <button
+                      type="button"
+                      className="btn btn-outline-success m-1"
+                      onClick={handleSubmit}
+                    >
+                      Submit
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>
