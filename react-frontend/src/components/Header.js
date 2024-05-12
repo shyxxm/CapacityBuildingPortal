@@ -1,14 +1,18 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useContext } from "react";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
+import UserContext from '../services/UserContext';
+
 
 const settings = ["Account", "Logout"];
 
 function Header() {
+  const { userData } = useContext(UserContext);
+
   const [anchorElUser, setAnchorElUser] = useState(null);
 
   const handleOpenUserMenu = (event) => {
@@ -88,12 +92,11 @@ function Header() {
               </li>
             </ul>
             <a
-              // href="https://adminmart.com/product/modernize-free-bootstrap-admin-dashboard/"
               target="_blank"
               className="btn btn-primary"
             >
-              Shyam Prasad
-            </a>
+              {userData.firstName}           
+               </a>
           </div>
         </nav>
       </header>

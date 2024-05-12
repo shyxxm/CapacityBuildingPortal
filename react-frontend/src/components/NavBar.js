@@ -1,7 +1,11 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useContext } from "react";
 import { Link } from "react-router-dom";
+import UserContext from '../services/UserContext';
+
 
 function Nav() {
+  const { firstName } = useContext(UserContext);
+
   return (
     <>
       <div>
@@ -96,6 +100,60 @@ function Nav() {
                         <i className="ti ti-picture-in-picture-on" />
                       </span>
                       <span className="hide-menu">Project Details</span>
+                    </a>
+                  </Link>
+                </li>
+                <li className="nav-small-cap">
+                  <i className="ti ti-dots nav-small-cap-icon fs-4" />
+                  <span className="hide-menu">General Functions</span>
+                </li>
+                <li className="sidebar-item">
+                  <Link to="/AddManager">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i
+                          className="ti ti-chart-infographic
+                        "
+                        />
+                      </span>
+                      <span className="hide-menu">Add Managers</span>
+                    </a>
+                  </Link>
+                </li>
+                <li className="sidebar-item">
+                  <Link to="/AddTrainer">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i className="ti ti-picture-in-picture-on" />
+                      </span>
+                      <span className="hide-menu">Add Trainers</span>
+                    </a>
+                  </Link>
+                </li>
+                <li className="nav-small-cap">
+                  <i className="ti ti-dots nav-small-cap-icon fs-4" />
+                  <span className="hide-menu">General Views</span>
+                </li>
+                <li className="sidebar-item">
+                  <Link to="/ViewManager">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i
+                          className="ti ti-chart-infographic
+                        "
+                        />
+                      </span>
+                      <span className="hide-menu">View Managers</span>
+                    </a>
+                  </Link>
+                </li>
+                <li className="sidebar-item">
+                  <Link to="/ViewTrainer">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i className="ti ti-picture-in-picture-on" />
+                      </span>
+                      <span className="hide-menu">View Trainers</span>
                     </a>
                   </Link>
                 </li>

@@ -1,6 +1,48 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useState, useContext, useEffect } from 'react'
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import UserContext from '../services//UserContext';
+
 
 function Login(){
+
+  const { userData, setUserData } = useContext(UserContext);
+
+
+  const navigate = useNavigate();
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    // Check if first name is stored in userData whenever userData changes
+    if (userData && userData.firstName !== null) {
+      console.log('First name is stored:', userData.firstName);
+      navigate('/');
+    }
+  }, [userData, navigate]);
+
+  const handleSubmit = (event) => {
+    event.preventDefault(); // Prevent default form submission behavior
+
+    // Make HTTP POST request to your backend API
+    axios.post('/login', { username, password})
+      .then((response) => {
+
+        const { firstName, username } = response.data;
+        console.log('Logged in successfully:', response.data);
+        setUserData({ firstName, username });
+        // Check if first name is stored in userData
+        navigate('/'); // Redirect to main page after delay
+      })
+      .catch((error) => {
+        console.log(username, password)
+        console.error('Error logging in User', error);
+        setErrorMessage('Invalid username or password.');
+        // Handle error if needed
+      });
+  };
     return (
         <Fragment>
             <>
@@ -31,16 +73,16 @@ function Login(){
                   />
                 </a>
                 <p className="text-center">Your Monitoring Portal</p>
-                <form>
+                <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label htmlFor="exampleInputEmail1" className="form-label">
                       Username
                     </label>
                     <input
-                      type="email"
+                      type="text"
                       className="form-control"
-                      id="exampleInputEmail1"
-                      aria-describedby="emailHelp"
+                      value={username}
+                      onChange={(event) => setUsername(event.target.value)}
                     />
                   </div>
                   <div className="mb-4">
@@ -54,6 +96,8 @@ function Login(){
                       type="password"
                       className="form-control"
                       id="exampleInputPassword1"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
                     />
                   </div>
                   <div className="d-flex align-items-center justify-content-between mb-4">
@@ -76,12 +120,12 @@ function Login(){
                       Forgot Password ?
                     </a> */}
                   </div>
-                  <a
-                    href="./index.html"
+                  <button
+                    type="submit"
                     className="btn btn-danger w-100 py-8 fs-4 mb-4 rounded-2"
                   >
                     Sign In
-                  </a>
+                  </button>
                   {/* <div className="d-flex align-items-center justify-content-center">
                     <p className="fs-4 mb-0 fw-bold">New to Modernize?</p>
                     <a
@@ -92,6 +136,8 @@ function Login(){
                     </a>
                   </div> */}
                 </form>
+                {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
+
               </div>
             </div>
           </div>

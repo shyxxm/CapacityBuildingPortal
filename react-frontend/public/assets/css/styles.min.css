@@ -16182,3 +16182,39 @@ font-family: 'Trebuchet MS';
 
   }
 
+  .tech-icon{
+    height: 40px;
+    pointer-events: none;
+    /* rotate: -90deg; */
+  }
+  
+  .ferris-wheel-techs{
+    left: 50%;
+    top: 25%;
+    height: 50%;
+    position: fixed;
+    overflow: hidden;
+  }
+  
+  .image-parent{
+    /* padding: 50% 0; */
+  }
+  
+  .image-shown {
+    left: 50%;
+    top: 45%;
+    position: fixed;
+    overflow: hidden;
+    width: 100px; /* Set the width */
+    opacity: 0; /* Start with opacity 0 */
+    transition: opacity 1.5s ease-in; /* Apply transition on opacity */
+  }
+  
+  .image-shown.show {
+    opacity: 1; /* Change opacity to 1 when the 'show' class is applied */
+  }
+  
+  .tech-shown {
+    width: 100px; /* Set the width */
+    height: auto; /* Maintain aspect ratio */
+  }

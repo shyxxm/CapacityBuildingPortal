@@ -23,6 +23,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers-pro";
 import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
+import axios from 'axios';
+
 
 import {
   Unstable_NumberInput as BaseNumberInput,
@@ -41,6 +43,9 @@ import DialogTitle from "@mui/material/DialogTitle";
 
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+
+
+
 
 const blue = {
   100: "#DAECFF",
@@ -242,20 +247,67 @@ function getStyles(name, personName, theme) {
 }
 
 function CreateProject() {
+
+// Get-Mangager API
+
+const [getManagers, setGetManagers] = useState({ data: [[]] });
+
+// function to fetch manager data
+const fetchData = () => {
+  fetch('/view_managers')
+    .then(res => {
+      if (res.ok) {
+        return res.json();
+      } else {
+        throw new Error('Server response not OK');
+      }
+    })
+    .then(data => {
+      setGetManagers(data); // Change the parameter name to 'data' or something else
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+};
+
+  useEffect(() => {
+    // Call fetchData immediately on component mount
+    fetchData();
+
+    // Set up a periodic fetch
+    const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
+
   const [activeStep, setActiveStep] = React.useState(0);
   const [openSnack, setOpenSnack] = React.useState(false);
   const navigate = useNavigate();
 
-  // Goes to the next step in the 3 step process
-  const handleNext = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    console.log(formValues);
+// Goes to the next step in the 3 step process
+const handleNext = () => {
+  setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  console.log(formValues);
 
-    // Check if the current step is the one where you want to open the dialog
-    if (activeStep === steps.length - 1) {
-      handleClickOpen(); // Call the function to open the dialog
-    }
-  };
+  // Check if the current step is the one where you want to open the dialog
+  if (activeStep === steps.length - 1) {
+    handleClickOpen(); // Call the function to open the dialog
+
+    // Make HTTP POST request to your backend API
+    axios.post('/create_project', formValues)
+      .then((response) => {
+        // Handle success
+        console.log('Data sent successfully:', response.data);
+      })
+      .catch((error) => {
+        // Handle error
+        console.error('Error sending data:', error);
+      });
+  }
+};
+
 
   // Goes back one step
   const handleBack = () => {
@@ -754,9 +806,9 @@ function CreateProject() {
                           <MenuItem disabled value="">
                             <em>Active PMs</em>
                           </MenuItem>
-                          {names.map((name) => (
+                          {getManagers.data.map((name, index) => (
                             <MenuItem
-                              key={name}
+                              key={index} // Assuming 'name' is unique, you can use 'name' as the key if it's guaranteed to be unique
                               value={name}
                               style={getStyles(name, personName, theme)}
                             >

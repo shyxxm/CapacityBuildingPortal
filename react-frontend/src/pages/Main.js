@@ -15,6 +15,39 @@ import ImpleTime from "../charts/Timeline/Implementation.tsx";
 import { useNavigate, Link } from "react-router-dom";
 
 function Main() {
+
+  const [chartData, setChartData] = useState({ data: [[]] });
+
+  // function to fetch data
+  const fetchData = () => {
+    fetch('/view_trainer_data')
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error('Server response not OK');
+        }
+      })
+      .then(chartData => {
+        setChartData(chartData);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
+
+  useEffect(() => {
+    // Call fetchData immediately on component mount
+    fetchData();
+
+    // Set up a periodic fetch
+    const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
+
   const navigate = useNavigate();
   useEffect(() => {
     const titles = document.querySelectorAll(".p2");
@@ -108,7 +141,7 @@ function Main() {
     <div className="page-wrapper" id="main-wrapper" data-layout="vertical">
       <div className="body-wrapper">
         {/*  Header Start */}
-        <Header></Header>
+        {/* <Header></Header> */}
         <div className="container-fluid">
           <div className="main-map2">
             <div className="text-wrapper2">
@@ -180,7 +213,7 @@ function Main() {
                     <h5 className="text-center header-text2">
                       Number of Trainers
                     </h5>
-                    <p className="text-center normal-text">6</p>
+                    <p className="text-center normal-text">{chartData.data[0][0]}</p>
                   </div>
                 </div>
               </div>
