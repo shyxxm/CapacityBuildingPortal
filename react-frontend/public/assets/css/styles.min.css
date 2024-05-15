@@ -16183,31 +16183,31 @@ font-family: 'Trebuchet MS';
   }
 
   .tech-icon{
-    height: 40px;
+    height: 20px;
     pointer-events: none;
     /* rotate: -90deg; */
   }
   
   .ferris-wheel-techs{
-    left: 50%;
-    top: 25%;
-    height: 50%;
+    left: 55%;
+    top: 40%;
+    height: 35%;
     position: fixed;
     overflow: hidden;
   }
   
   .image-parent{
     /* padding: 50% 0; */
+    
   }
   
   .image-shown {
-    left: 50%;
-    top: 45%;
-    position: fixed;
-    overflow: hidden;
+    left: 48%;
+    top: 16%;
     width: 100px; /* Set the width */
     opacity: 0; /* Start with opacity 0 */
-    transition: opacity 1.5s ease-in; /* Apply transition on opacity */
+    transition: opacity 1.5s ease-in; /* Apply transition on opacity */    
+    position: absolute
   }
   
   .image-shown.show {
@@ -16215,6 +16215,28 @@ font-family: 'Trebuchet MS';
   }
   
   .tech-shown {
-    width: 100px; /* Set the width */
+    width: 90px; /* Set the width */
     height: auto; /* Maintain aspect ratio */
+  }
+
+  .chart-container-output {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh; /* Adjust this as needed */
+    width: 100%; /* Full width */
+  }
+  
+  .chart-line-output {
+    height: 100%; /* Set to full height of the container */
+    width: 100%; /* Adjust width as needed */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 1.5s ease-in;
+  }
+
+  .chart-line-output.show {
+    opacity: 1;
   }

@@ -17,13 +17,16 @@ import AddTrainer from "./pages/AddTrainer";
 import AddManager from "./pages/AddManager";
 import ViewManager from "./pages/ViewManager";
 import ViewTrainer from "./pages/ViewTrainer";
+import SampleNew from "./pages/SampleNew";
 import { UserProvider } from "./services/UserContext"; // Import UserProvider from UserContext
 
 function App() {
   return (
     <div className="App">
       <Router>
-        <UserProvider> {/* Wrap your Router with UserProvider */}
+        <UserProvider>
+          {" "}
+          {/* Wrap your Router with UserProvider */}
           <Routes>
             <Route path="/" element={<Main />} />
             <Route path="/Dashboard" element={<Index />} />
@@ -43,6 +46,7 @@ function App() {
             <Route path="/AddManager" element={<AddManager />} />
             <Route path="/ViewManager" element={<ViewManager />} />
             <Route path="/ViewTrainer" element={<ViewTrainer />} />
+            <Route path="/SampleNew" element={<SampleNew />} />
           </Routes>
         </UserProvider>
       </Router>

@@ -10,6 +10,8 @@ from DashboardApi.login import login_api
 from DashboardApi.view_managers import view_managers_api
 from DashboardApi.view_trainers import view_trainers_api
 from DashboardApi.create_project import create_project_api
+from DashboardApi.text_analysis import text_analysis_api
+
 
 
 
@@ -66,6 +68,7 @@ app.register_blueprint(login_api)
 app.register_blueprint(view_managers_api)
 app.register_blueprint(view_trainers_api)
 app.register_blueprint(create_project_api)
+app.register_blueprint(text_analysis_api)
 
 
 

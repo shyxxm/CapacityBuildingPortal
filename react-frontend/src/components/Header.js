@@ -5,8 +5,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import UserContext from '../services/UserContext';
-
+import UserContext from "../services/UserContext";
 
 const settings = ["Account", "Logout"];
 
@@ -91,12 +90,9 @@ function Header() {
                 </Menu>
               </li>
             </ul>
-            <a
-              target="_blank"
-              className="btn btn-primary"
-            >
-              {userData.firstName}           
-               </a>
+            <a target="_blank" className="btn btn-primary">
+              {/* {userData.firstName}            */}
+            </a>
           </div>
         </nav>
       </header>

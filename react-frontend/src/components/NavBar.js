@@ -1,7 +1,6 @@
 import React, { Fragment, useContext } from "react";
 import { Link } from "react-router-dom";
-import UserContext from '../services/UserContext';
-
+import UserContext from "../services/UserContext";
 
 function Nav() {
   const { firstName } = useContext(UserContext);
@@ -256,6 +255,16 @@ function Nav() {
                         <i className="ti ti-aperture" />
                       </span>
                       <span className="hide-menu">Sample Page</span>
+                    </a>
+                  </Link>
+                </li>
+                <li className="sidebar-item">
+                  <Link to="/SampleNew">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i className="ti ti-aperture" />
+                      </span>
+                      <span className="hide-menu">New Sample Page</span>
                     </a>
                   </Link>
                 </li>
