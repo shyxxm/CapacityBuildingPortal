@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from PyPDF2 import PdfReader
 import textract
 import nltk
+nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 import regex as re
 import torch
