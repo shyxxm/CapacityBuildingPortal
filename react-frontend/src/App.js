@@ -18,6 +18,8 @@ import AddManager from "./pages/AddManager";
 import ViewManager from "./pages/ViewManager";
 import ViewTrainer from "./pages/ViewTrainer";
 import SampleNew from "./pages/SampleNew";
+import ProjectConfig from "./pages/ProjectConfig";
+
 import { UserProvider } from "./services/UserContext"; // Import UserProvider from UserContext
 
 function App() {
@@ -47,6 +49,7 @@ function App() {
             <Route path="/ViewManager" element={<ViewManager />} />
             <Route path="/ViewTrainer" element={<ViewTrainer />} />
             <Route path="/SampleNew" element={<SampleNew />} />
+            <Route path="/ProjectConfig" element={<ProjectConfig />} />
           </Routes>
         </UserProvider>
       </Router>

@@ -115,6 +115,9 @@ function TextAnalysisNew() {
   const handleNext = (event) => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
+    // create a variable
+    
+
     // Check the active step and perform different actions accordingly
     if (activeStep === 0) {
       // Trigger file upload logic when the "Next" button is clicked for step 1
@@ -360,9 +363,11 @@ function TextAnalysisNew() {
                             </React.Fragment>
                           ) : (
                             <React.Fragment>
-                              <Typography sx={{ mt: 10, textAlign: "center" }}>
-                                Step {activeStep + 1}
-                              </Typography>
+                              {activeStep !== 2 && (
+                                <Typography sx={{ mt: 10, textAlign: "center" }}>
+                                  Step {activeStep + 1}
+                                </Typography>
+                              )}
                               <Box
                                 sx={{
                                   pt: 2,
@@ -518,10 +523,41 @@ function TextAnalysisNew() {
                                     <br></br>
                                     <br></br>
                                     <br></br>
-                                    <br></br>
-                                    <br></br>
-                                    <br></br>
-                                    <br></br>
+                                    <div className="row">
+                        <div className="col-md-4 d-flex">
+                          <div className="card flex-fill">
+                            <div className="card-body d-flex flex-column">
+                              <h5 className="text-center">
+                                Sentiment Analysis
+                              </h5>
+                              <br></br>
+                              <br></br>
+                              <br></br>
+                              <button type="button" className="btn btn-success m-1">
+                          Positive
+                        </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="col-md-4 d-flex">
+                          <div className="card flex-fill">
+                            <div className="card-body d-flex flex-column">
+                              <h5 className="text-center">
+                                SDG Classification
+                              </h5>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="col-md-4 d-flex">
+                          <div className="card flex-fill">
+                            <div className="card-body d-flex flex-column">
+                              <h5 className="text-center">Keyword Extraction</h5>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                                     {ferrisOfTechs.map((tech, index) => (
                                       <motion.div
                                         className="ferris-wheel-techs"

@@ -75,6 +75,16 @@ function Nav() {
                     </a>
                   </Link>
                 </li>
+                <li className="sidebar-item">
+                  <Link to="/ProjectConfig">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i className="ti ti-fidget-spinner" />
+                      </span>
+                      <span className="hide-menu">Project Configuration</span>
+                    </a>
+                  </Link>
+                </li>
                 <li className="nav-small-cap">
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">Project Reports</span>

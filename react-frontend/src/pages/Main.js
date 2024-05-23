@@ -17,6 +17,10 @@ import { useNavigate, Link } from "react-router-dom";
 function Main() {
 
   const [chartData, setChartData] = useState({ data: [[]] });
+  const [programData, setProgramData] = useState({ data: [[]] });
+  const [programName, setProgramName] = useState({ data: [[]] });
+
+
 
   // function to fetch data
   const fetchData = () => {
@@ -36,16 +40,62 @@ function Main() {
       });
   };
 
-  useEffect(() => {
-    // Call fetchData immediately on component mount
-    fetchData();
+    // function to fetch data
+    const fetchProgramData = () => {
+      fetch('/view_program_count')
+        .then(res => {
+          if (res.ok) {
+            return res.json();
+          } else {
+            throw new Error('Server response not OK');
+          }
+        })
+        .then(programData => {
+          setProgramData(programData);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    };
 
-    // Set up a periodic fetch
-    const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+        // function to fetch data
+        const fetchProgramName = () => {
+          fetch('/view_program_name')
+            .then(res => {
+              if (res.ok) {
+                return res.json();
+              } else {
+                throw new Error('Server response not OK');
+              }
+            })
+            .then(programName => {
+              setProgramName(programName);
+            })
+            .catch(error => {
+              console.error('Error fetching data:', error);
+            });
+        };
 
-    // Clear interval on component unmount
-    return () => clearInterval(intervalId);
-  }, []);
+    useEffect(() => {
+      // Call fetchData and fetchProgramData immediately on component mount
+      fetchData();
+      fetchProgramData();
+      fetchProgramName();
+    
+      // Set up a periodic fetch
+      const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+      const intervalProgramId = setInterval(fetchProgramData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+      const intervalProgramName= setInterval(fetchProgramName, 5000); // Fetch every 5000 milliseconds (5 seconds)
+
+    
+      // Clear intervals on component unmount
+      return () => {
+        clearInterval(intervalId);
+        clearInterval(intervalProgramId);
+        clearInterval(intervalProgramName);
+
+      };
+    }, []);
 
 
   const navigate = useNavigate();
@@ -158,7 +208,7 @@ function Main() {
                     <h5 className="text-center header-text2">
                       Number of Projects
                     </h5>
-                    <p className="text-center normal-text">6</p>
+                    <p className="text-center normal-text">{programData.data[0][0]}</p>
                   </div>
                 </div>
               </div>
@@ -245,20 +295,20 @@ function Main() {
           </div>
 
           <div className="main-map" ref={thirdItemRef}>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Project</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={project}
-                label="Project"
-                onChange={handleChange}
-              >
-                <MenuItem value={"Project 1"}>Project 1</MenuItem>
-                <MenuItem value={"Project 2"}>Project 2</MenuItem>
-                <MenuItem value={"Project 3"}>Project 3</MenuItem>
-              </Select>
-            </FormControl>
+          <FormControl fullWidth>
+        <InputLabel id="demo-simple-select-label">Project</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={project}
+          label="Project"
+          onChange={handleChange}
+        >
+          {programName.data.map((name, index) => (
+            <MenuItem key={index} value={name}>{name}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
           </div>
           <div className="centered-button">
             <Link to="/dashboard">
