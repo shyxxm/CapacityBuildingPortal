@@ -4,6 +4,8 @@ import psycopg2
 import time
 from DashboardApi.landing_page import view_manager_api, view_trainer_api, view_trainee_api, view_program_count_api, view_program_name_api
 from DashboardApi.project_creation import project_creation_api
+from DashboardApi.project_details import project_details_api
+
 from DashboardApi.add_manager import add_manager_api
 from DashboardApi.add_trainer import add_trainer_api
 from DashboardApi.login import login_api
@@ -70,6 +72,7 @@ app.register_blueprint(view_managers_api)
 app.register_blueprint(view_trainers_api)
 app.register_blueprint(create_project_api)
 app.register_blueprint(text_analysis_api)
+app.register_blueprint(project_details_api)
 
 
 

@@ -111,12 +111,13 @@ function TextAnalysisNew() {
   const [showgraph, setShowgraph] = useState(false);
   const [stopSpinning, setStopSpinning] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
+  const [sentiment, setSentiment] = useState("");
+  const [keyphrases, setKeyphrases] = useState([]);
 
   const handleNext = (event) => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
     // create a variable
-    
 
     // Check the active step and perform different actions accordingly
     if (activeStep === 0) {
@@ -226,26 +227,54 @@ function TextAnalysisNew() {
       const processedText = response.data.text;
       console.log("Processed text:", processedText);
 
+      // Access the processed text from the response
+      const predicted_sentiment = response.data.sentiment;
+      console.log("Predicted sentiment:", predicted_sentiment);
+
+      // Set the predicted sentiment
+      setSentiment(predicted_sentiment);
+
       // Access the predictions from the response
       const predictions = response.data.predictions;
       console.log("predictions:", predictions);
 
-      // Extract labels and data from predictions
-      const labels = predictions.map((prediction) => prediction[0]);
-      const data = predictions.map((prediction) => prediction[1]);
+      // Access the keyphrases from the response
+      const keyphrases = response.data.keyphrases;
+      console.log("Keyphrases:", keyphrases);
 
-      // Select the image based on the first prediction
-      const selectedImageKey = predictions[0][0];
+      // Set the keyphrases in your state
+      setKeyphrases(keyphrases);
+
+      // Extract labels and data from predictions
+      const labels = Object.keys(predictions);
+      const data = Object.values(predictions);
+
+      // Sort predictions by score in descending order
+      const sortedPredictions = labels
+        .map((label, index) => ({
+          label,
+          score: data[index],
+        }))
+        .sort((a, b) => b.score - a.score);
+
+      console.log("Sorted Predictions:", sortedPredictions);
+
+      // Select the image based on the highest prediction score
+      const selectedImageKey = sortedPredictions[0].label;
       console.log(selectedImageKey);
       setSelectedImage(selectedImageKey); // Set the selected image key
 
-      // Update chartData state with new labels and data
+      setShowgraph(true);
+      setShowImage(true);
+      setStopSpinning(true);
+
+      // Update chartData state with new sorted labels and data
       setChartData({
-        labels,
+        labels: sortedPredictions.map((prediction) => prediction.label),
         datasets: [
           {
             label: "SDG Predictions",
-            data,
+            data: sortedPredictions.map((prediction) => prediction.score),
             borderColor: "rgba(0, 51, 153, 1)", // Deep blue color
             backgroundColor: "rgba(0, 153, 51, 0.5)", // Bright green color with 50% opacity
             pointStyle: "circle",
@@ -264,42 +293,42 @@ function TextAnalysisNew() {
     setActiveStep(0);
   };
 
-  useEffect(() => {
-    // Set showImage to true after a delay to trigger the animation
-    const timeout = setTimeout(() => {
-      setShowgraph(true);
-      setShowImage(true);
-    }, 15000); // 20 seconds delay
+  // useEffect(() => {
+  //   // Set showImage to true after a delay to trigger the animation
+  //   const timeout = setTimeout(() => {
+  //     setShowgraph(true);
+  //     setShowImage(true);
+  //   }, 15000); // 20 seconds delay
 
-    // Stop spinning after 20 seconds
-    const stopTimeout = setTimeout(() => {
-      setStopSpinning(true);
-    }, 15000); // 20 seconds delay
+  //   // Stop spinning after 20 seconds
+  //   const stopTimeout = setTimeout(() => {
+  //     setStopSpinning(true);
+  //   }, 15000); // 20 seconds delay
 
-    return () => {
-      clearTimeout(timeout);
-      clearTimeout(stopTimeout);
-    };
-  }, []);
+  //   return () => {
+  //     clearTimeout(timeout);
+  //     clearTimeout(stopTimeout);
+  //   };
+  // }, []);
 
   const ferrisOfTechs = [
-    "SDG1.png",
-    "SDG2.png",
-    "SDG3.png",
-    "SDG4.png",
-    "SDG5.png",
-    "SDG6.png",
-    "SDG7.png",
-    "SDG8.png",
-    "SDG9.png",
-    "SDG10.png",
-    "SDG11.png",
-    "SDG12.png",
-    "SDG13.png",
-    "SDG14.png",
-    "SDG15.png",
-    "SDG16.png",
-    "SDG17.png",
+    "SDG 1.png",
+    "SDG 2.png",
+    "SDG 3.png",
+    "SDG 4.png",
+    "SDG 5.png",
+    "SDG 6.png",
+    "SDG 7.png",
+    "SDG 8.png",
+    "SDG 9.png",
+    "SDG 10.png",
+    "SDG 11.png",
+    "SDG 12.png",
+    "SDG 13.png",
+    "SDG 14.png",
+    "SDG 15.png",
+    "SDG 16.png",
+    "SDG 17.png",
   ];
 
   return (
@@ -364,7 +393,9 @@ function TextAnalysisNew() {
                           ) : (
                             <React.Fragment>
                               {activeStep !== 2 && (
-                                <Typography sx={{ mt: 10, textAlign: "center" }}>
+                                <Typography
+                                  sx={{ mt: 10, textAlign: "center" }}
+                                >
                                   Step {activeStep + 1}
                                 </Typography>
                               )}
@@ -523,41 +554,73 @@ function TextAnalysisNew() {
                                     <br></br>
                                     <br></br>
                                     <br></br>
-                                    <div className="row">
-                        <div className="col-md-4 d-flex">
-                          <div className="card flex-fill">
-                            <div className="card-body d-flex flex-column">
-                              <h5 className="text-center">
-                                Sentiment Analysis
-                              </h5>
-                              <br></br>
-                              <br></br>
-                              <br></br>
-                              <button type="button" className="btn btn-success m-1">
-                          Positive
-                        </button>
-                            </div>
-                          </div>
-                        </div>
+                                    {stopSpinning && (
+                                      <div className="row">
+                                        <div className="col-md-4 d-flex">
+                                          <div className="card flex-fill">
+                                            <div className="card-body d-flex flex-column">
+                                              <h5 className="text-center">
+                                                Sentiment Analysis
+                                              </h5>
+                                              <div className="flex-grow-1 d-flex justify-content-center align-items-center">
+                                                {sentiment && (
+                                                  <button
+                                                    type="button"
+                                                    className={`btn w-100 m-1 ${
+                                                      sentiment === "positive"
+                                                        ? "btn-success"
+                                                        : "btn-danger"
+                                                    }`}
+                                                  >
+                                                    {sentiment === "positive"
+                                                      ? "Positive"
+                                                      : "Danger"}
+                                                  </button>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
 
-                        <div className="col-md-4 d-flex">
-                          <div className="card flex-fill">
-                            <div className="card-body d-flex flex-column">
-                              <h5 className="text-center">
-                                SDG Classification
-                              </h5>
-                            </div>
-                          </div>
-                        </div>
+                                        <div className="col-md-4 d-flex">
+                                          <div className="card flex-fill">
+                                            <div className="card-body d-flex flex-column">
+                                              <h5 className="text-center">
+                                                SDG Classification
+                                              </h5>
+                                            </div>
+                                          </div>
+                                        </div>
 
-                        <div className="col-md-4 d-flex">
-                          <div className="card flex-fill">
-                            <div className="card-body d-flex flex-column">
-                              <h5 className="text-center">Keyword Extraction</h5>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                                        <div className="col-md-4 d-flex">
+                                          <div className="card flex-fill">
+                                            <div className="card-body d-flex flex-column">
+                                              <h5 className="text-center">
+                                                Keyword Extraction
+                                              </h5>
+                                              <br />
+                                              <br />
+                                              <div className="d-flex flex-wrap">
+                                                {keyphrases.map(
+                                                  (keyword, index) => (
+                                                    <button
+                                                      key={index}
+                                                      type="button"
+                                                      className="btn btn-outline-primary m-1"
+                                                      style={{
+                                                        flex: "1 0 30%",
+                                                      }}
+                                                    >
+                                                      {keyword}
+                                                    </button>
+                                                  )
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
                                     {ferrisOfTechs.map((tech, index) => (
                                       <motion.div
                                         className="ferris-wheel-techs"
@@ -626,6 +689,7 @@ function TextAnalysisNew() {
                                         className={`chart-line-output ${
                                           showgraph ? "show" : ""
                                         }`}
+                                        style={{ height: "600px" }}
                                       >
                                         <Line
                                           ref={chartRef}

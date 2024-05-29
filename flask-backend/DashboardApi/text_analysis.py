@@ -1,25 +1,52 @@
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import openai
+import os
+from dotenv import load_dotenv
 from flask import Blueprint, request, jsonify
 from PyPDF2 import PdfReader
 import textract
 import nltk
-nltk.download('punkt')
-from nltk.tokenize import sent_tokenize
 import regex as re
 import torch
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModelForTokenClassification, pipeline
+import numpy as np
 
+# Debugging: Print current working directory and check .env file existence
+print(f"Current working directory: {os.getcwd()}")
+print(f".env file exists: {os.path.isfile('.env')}")
 
-# Load pre-trained model and tokenizer
-tokenizer = AutoTokenizer.from_pretrained("sadickam/sdg-classification-bert")
-# Load pre-trained model
-model = AutoModelForSequenceClassification.from_pretrained("sadickam/sdg-classification-bert")
+# Load environment variables from .env file
+load_dotenv()
+
+# Retrieve the OpenAI API key from environment variables
+api_key = os.getenv('OPENAI_API_KEY')
+if not api_key:
+    raise ValueError("API key not found. Please set the OPENAI_API_KEY environment variable.")
+else:
+    print(f"API key loaded: {api_key[:5]}...")  # Print the first few characters for confirmation
+
+# Initialize the OpenAI API client
+openai.api_key = api_key
+
+# Specify the path where the model and tokenizer are saved
+model_path = 'D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/SDGFinal'
+
+# Load the tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained(model_path)
+model = AutoModelForSequenceClassification.from_pretrained(model_path)
+
+# Load the sentiment tokenizer and model
+sentiment_tokenizer = AutoTokenizer.from_pretrained("D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/sentiment_model")
+sentiment_model = AutoModelForSequenceClassification.from_pretrained("D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/sentiment_model")
+
+# Ensure the model is in evaluation mode
+model.eval()
 
 text_analysis_api = Blueprint('text_analysis_api', __name__)
 
 # Route to upload file and get predicted SDG
 @text_analysis_api.route('/upload_file', methods=['POST'])
 def upload_file():
-    file = request.files['file'] # Access the uploaded file
+    file = request.files['file']  # Access the uploaded file
 
     if file.filename.endswith('.pdf'):
         # Extract text from PDF
@@ -32,35 +59,20 @@ def upload_file():
         text = file.read().decode('utf-8')
     else:
         # Extract text using textract for other file types (e.g., Word, PowerPoint)
-        text = textract.process(file)
-
-    # # Preprocess text
-    # preprocessed_text = process_text(text)
-
-    # # Perform data analysis and get predicted SDG
-    # predicted_sdg = data_analysis(text)
-
-    # print(predicted_sdg)
-
+        text = textract.process(file).decode('utf-8')
 
     return jsonify({'message': 'Text extracted successfully', 'text': text})
 
 # Function to preprocess text
 @text_analysis_api.route('/process_text', methods=['POST'])
 def process_text():
-    """
-    Function for preprocessing text
-    """
-
-    # Extract text from the request
     request_data = request.json
     if request_data and 'text' in request_data:
         text = request_data['text']
-        print(text)
 
         # Remove trailing characters (\s\n) and convert to lowercase
-        clean_sents = []  # Append clean con sentences
-        sent_tokens = sent_tokenize(str(text))
+        clean_sents = []  # Append clean sentences
+        sent_tokens = nltk.sent_tokenize(str(text))
         for sent_token in sent_tokens:
             word_tokens = [str(word_token).strip().lower() for word_token in sent_token.split()]
             clean_sents.append(' '.join(word_tokens))
@@ -68,82 +80,145 @@ def process_text():
         joined = re.sub(r'`', "", joined)
         joined = re.sub(r'"', "", joined)
 
-        # Call the function to analyse text
-        sorted_preds = analyse_text(joined)
-        print(sorted_preds)
+        # Call the function to analyze text
+        keyphrases = extract_keyphrases(joined)
+        sorted_sdg_scores = analyze_text(joined)
+        predicted_sentiment = predict_sentiment(joined)
+        sdg, keywords, sentiment, sdg_scores, most_likely_sdg = chatgpt(joined)
 
-        return jsonify({'message': 'Text processed successfully', 'text': joined, 'predictions': sorted_preds})
+        return jsonify({
+            'message': 'Text processed successfully',
+            'text': joined,
+            'predictions': sorted_sdg_scores,
+            'sentiment': predicted_sentiment,
+            'keyphrases': list(keyphrases),
+            'chatgpt_sdg': sdg,
+            'chatgpt_keywords': keywords,
+            'chatgpt_sentiment': sentiment,
+            'chatgpt_sdg_scores': sdg_scores,
+            'chatgpt_most_likely_sdg': most_likely_sdg
+        })
     else:
         return jsonify({'error': 'Text not found in request'}), 400
 
-# Function to analyse text
-def analyse_text(joined):
-    """
-    Function to analyse text
-    """
-    print(joined)
-    # Tokenize the text
+# Function to analyze text
+def analyze_text(joined):
     inputs = tokenizer(joined, return_tensors="pt", padding=True, truncation=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+        logits = outputs.logits
 
-    label_list = [
-        'SDG1',
-        'SDG2',
-        'SDG3',
-        'SDG4',
-        'SDG5',
-        'SDG6',
-        'SDG7',
-        'SDG8',
-        'SDG9',
-        'SDG10',
-        'SDG11',
-        'SDG12',
-        'SDG13',
-        'SDG14',
-        'SDG15',
-        'SDG16',
-        'SDG17'
-    ]
+        # Check for NaN values in the logits
+        if torch.isnan(logits).any():
+            print("Warning: NaN values detected in the logits.")
+            return
 
-    # Perform SDG classification
-    outputs = model(**inputs)
+        predictions = torch.softmax(logits, dim=1)[0]
+        sdg_scores = {f"SDG {idx + 1}": score.item() for idx, score in enumerate(predictions)}
+        sorted_sdg_scores = dict(sorted(sdg_scores.items(), key=lambda item: item[1], reverse=True))
 
-    # Obtain logits and predictions
-    text_logits = outputs.logits
-    predictions = torch.softmax(text_logits, dim=1).tolist()[0]
-    predictions = [round(a, 3) for a in predictions]
+    return sorted_sdg_scores
 
-    # Create dictionary with label as key and percentage as value
-    pred_dict = dict(zip(label_list, predictions))
+# Define the function to predict sentiment
+def predict_sentiment(joined):
+    inputs = sentiment_tokenizer(joined, return_tensors="pt", truncation=True, padding=True)
+    outputs = sentiment_model(**inputs)
+    logits = outputs.logits
+    predicted_class_id = logits.argmax().item()
+    predicted_sentiment = "positive" if predicted_class_id == 1 else "negative"
+    return predicted_sentiment
 
-    # Sort 'pred_dict' by value and index the highest at [0]
-    sorted_preds = sorted(pred_dict.items(), key=lambda x: x[1], reverse=True)
-    
-    return sorted_preds
+def extract_keyphrases(text, model_name="ml6team/keyphrase-extraction-kbir-kpcrowd"):
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForTokenClassification.from_pretrained(model_name)
+    nlp_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+    results = nlp_pipeline(text)
+    keyphrases = np.unique([result['word'].strip() for result in results])
+    return keyphrases
 
-# Function to preprocess whatsapp message
+def chatgpt(joined):
+    """
+    Classifies the given text into one of the 17 SDGs, extracts keywords, performs sentiment analysis,
+    and provides scores for each SDG.
+    """
+    prompt = (
+        f"The following text is related to one or more of the Sustainable Development Goals (SDGs). "
+        f"Please classify it by providing the SDG number and a confidence score ranging from 0 to 1. "
+        f"For example, if the text is most likely related to SDG 3, you might assign a score of 0.99. "
+        f"For example, if there is also a slight chance it is related to SDG 4, you might give it a score of 0.44. "
+        f"Additionally, please extract the keywords from the text and perform a sentiment analysis, "
+        f"indicating whether the sentiment is positive, negative, or neutral.\n\n"
+        f"Text: \"{joined}\"\n\n"
+        f"Provide the results in the following format:\n"
+        f"SDG: <SDG number>\nKeywords: <keywords>\nSentiment: <sentiment>\n\n"
+        f"Scores:\n"
+        f"SDG 1: <score>\nSDG 2: <score>\n...SDG 17: <score>"
+    )
+
+    response = openai.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=300,
+        temperature=0.7
+    )
+
+    response_text = response.choices[0].message.content.strip()
+    lines = response_text.split("\n")
+
+    # Extract SDG, Keywords, and Sentiment
+    sdg = "N/A"
+    keywords = "N/A"
+    sentiment = "N/A"
+
+    sdg_scores = {}
+    parsing_scores = False
+    for line in lines:
+        if line.startswith("SDG:"):
+            sdg = line.split(":")[1].strip()
+        elif line.startswith("Keywords:"):
+            keywords = line.split(":")[1].strip()
+        elif line.startswith("Sentiment:"):
+            sentiment = line.split(":")[1].strip()
+        elif line.startswith("Scores:"):
+            parsing_scores = True
+        elif parsing_scores and line.startswith("SDG"):
+            sdg_num, score = line.split(":")
+            try:
+                sdg_scores[sdg_num.strip()] = float(score.strip())
+            except ValueError:
+                print(f"Skipping invalid score line: {line}")
+
+    # Find the most likely SDG if there are valid scores
+    most_likely_sdg = max(sdg_scores, key=sdg_scores.get) if sdg_scores else "N/A"
+
+    print(f"SDG: {sdg}")
+    print(f"Keywords: {keywords}")
+    print(f"Sentiment: {sentiment}")
+    for sdg_num, score in sdg_scores.items():
+        print(f"{sdg_num}: {score:.4f}")
+    print(f"The most likely SDG is: {most_likely_sdg}")
+
+    return sdg, keywords, sentiment, sdg_scores, most_likely_sdg
+
+# Function to preprocess WhatsApp messages
 @text_analysis_api.route('/whatsapp_text', methods=['POST'])
 def whatsapp_text():
-    """
-    Function for preprocessing WhatsApp text messages.
-    """
     try:
-        # Check if a file part is present in the request
         if 'file' not in request.files:
             return jsonify({'error': 'File not found in request'}), 400
 
         file = request.files['file']
 
-        # Check if the file is a text file
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
 
         if not file.filename.endswith('.txt'):
             return jsonify({'error': 'Invalid file type. Only .txt files are allowed'}), 400
 
-        # Read the contents of the text file
         text = file.read().decode('utf-8')
-        print(f"Received text: {text}")
 
         # Regular expression to match the date, time, and name
         pattern = r'\[\d{1,2}/\d{1,2}/\d{2,4}, \d{1,2}:\d{2}:\d{2}\s?(?:AM|PM)?\] [^:]+: '
@@ -160,4 +235,3 @@ def whatsapp_text():
     except Exception as e:
         print(f"Error processing text: {e}")
         return jsonify({'error': 'Internal server error'}), 500
-
