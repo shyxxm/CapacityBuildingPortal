@@ -65,7 +65,7 @@ function Nav() {
                     </a>
                   </Link>
                 </li>
-                <li className="sidebar-item">
+                {/* <li className="sidebar-item">
                   <Link to="/">
                     <a className="sidebar-link" aria-expanded="false">
                       <span>
@@ -74,7 +74,7 @@ function Nav() {
                       <span className="hide-menu">Edit Project KPIs</span>
                     </a>
                   </Link>
-                </li>
+                </li> */}
                 <li className="sidebar-item">
                   <Link to="/ProjectConfig">
                     <a className="sidebar-link" aria-expanded="false">
@@ -85,11 +85,21 @@ function Nav() {
                     </a>
                   </Link>
                 </li>
+                <li className="sidebar-item">
+                  <Link to="/CenterConfig">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i className="ti ti-fidget-spinner" />
+                      </span>
+                      <span className="hide-menu">Center Configuration</span>
+                    </a>
+                  </Link>
+                </li>
                 <li className="nav-small-cap">
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">Project Reports</span>
                 </li>
-                <li className="sidebar-item">
+                {/* <li className="sidebar-item">
                   <Link to="/">
                     <a className="sidebar-link" aria-expanded="false">
                       <span>
@@ -101,7 +111,7 @@ function Nav() {
                       <span className="hide-menu">Status across Centers</span>
                     </a>
                   </Link>
-                </li>
+                </li> */}
                 <li className="sidebar-item">
                   <Link to="/ProjectDetails">
                     <a className="sidebar-link" aria-expanded="false">
@@ -109,6 +119,16 @@ function Nav() {
                         <i className="ti ti-picture-in-picture-on" />
                       </span>
                       <span className="hide-menu">Project Details</span>
+                    </a>
+                  </Link>
+                </li>
+                <li className="sidebar-item">
+                  <Link to="/TextAnalysis">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i className="ti ti-picture-in-picture-on" />
+                      </span>
+                      <span className="hide-menu">Text Analysis</span>
                     </a>
                   </Link>
                 </li>
@@ -139,6 +159,16 @@ function Nav() {
                     </a>
                   </Link>
                 </li>
+                <li className="sidebar-item">
+                  <Link to="/AddCenter">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i className="ti ti-picture-in-picture-on" />
+                      </span>
+                      <span className="hide-menu">Add Centers</span>
+                    </a>
+                  </Link>
+                </li>
                 <li className="nav-small-cap">
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">General Views</span>
@@ -166,7 +196,7 @@ function Nav() {
                     </a>
                   </Link>
                 </li>
-                <li className="nav-small-cap">
+                {/* <li className="nav-small-cap">
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">UI COMPONENTS</span>
                 </li>
@@ -219,8 +249,8 @@ function Nav() {
                       <span className="hide-menu">Typography</span>
                     </a>
                   </Link>
-                </li>
-                <li className="nav-small-cap">
+                </li> */}
+                {/* <li className="nav-small-cap">
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">AUTH</span>
                 </li>
@@ -243,7 +273,7 @@ function Nav() {
                       <span className="hide-menu">Register</span>
                     </a>
                   </Link>
-                </li>
+                </li> */}
                 <li className="nav-small-cap">
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">EXTRA</span>

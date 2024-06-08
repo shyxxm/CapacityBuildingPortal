@@ -9,10 +9,14 @@ from DashboardApi.project_details import project_details_api
 from DashboardApi.add_manager import add_manager_api
 from DashboardApi.add_trainer import add_trainer_api
 from DashboardApi.login import login_api
-from DashboardApi.view_managers import view_managers_api
-from DashboardApi.view_trainers import view_trainers_api
+from DashboardApi.view_managers import view_managers_api,delete_manager_api, edit_manager_api
+from DashboardApi.view_trainers import view_trainers_api, delete_trainer_api, edit_trainer_api
 from DashboardApi.create_project import create_project_api
 from DashboardApi.text_analysis import text_analysis_api
+
+from DashboardApi.project_config import view_centers_api, add_center_api, get_program_id_api, edit_center_api, delete_center_api, add_course_api, edit_course_api, delete_course_api, view_courses_api, view_program_details_api,get_max_course_id_api, view_all_courses_api, get_center_id_by_name_api
+
+
 
 
 
@@ -73,10 +77,24 @@ app.register_blueprint(view_trainers_api)
 app.register_blueprint(create_project_api)
 app.register_blueprint(text_analysis_api)
 app.register_blueprint(project_details_api)
-
-
-
-
+app.register_blueprint(delete_manager_api)
+app.register_blueprint(edit_manager_api)
+app.register_blueprint(delete_trainer_api)
+app.register_blueprint(edit_trainer_api)
+app.register_blueprint(add_center_api)
+app.register_blueprint(view_centers_api)
+app.register_blueprint(get_program_id_api)
+app.register_blueprint(edit_center_api)
+app.register_blueprint(delete_center_api)
+app.register_blueprint(view_courses_api)
+app.register_blueprint(edit_course_api)
+app.register_blueprint(delete_course_api)
+app.register_blueprint(add_course_api)
+app.register_blueprint(project_creation_api)
+app.register_blueprint(view_program_details_api)
+app.register_blueprint(get_max_course_id_api)
+app.register_blueprint(view_all_courses_api)
+app.register_blueprint(get_center_id_by_name_api)
 
 
 

@@ -1,340 +1,483 @@
-import React, { Fragment, useState, useEffect, useRef } from "react";
+import React, { useEffect, Fragment, useRef } from "react";
 import Header from "../components/Header";
 import Nav from "../components/NavBar";
-import { motion } from "framer-motion";
+
 import Box from "@mui/material/Box";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import axios from "axios";
-import TextField from "@mui/material/TextField";
-import { Line } from "react-chartjs-2";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Close";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import "chartjs-plugin-datalabels";
+  GridRowModes,
+  DataGrid,
+  GridToolbarContainer,
+  GridActionsCellItem,
+  GridRowEditStopReasons,
+} from "@mui/x-data-grid";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 
-const steps = [
-  "Select type of text to analyse",
-  "Confirm text to analyse",
-  "Analysis Output",
-];
+const initialRows = [];
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+function EditToolbar(props) {
+  const { rows, setRows, setRowModesModel } = props;
 
-function TextAnalysisNew() {
-  const chartRef = useRef(null);
-  const [chartData, setChartData] = useState({
-    labels: [], // Initialize with empty array
-    datasets: [
+  const handleClick = () => {
+    const highestId =
+      rows.length > 0 ? Math.max(...rows.map((row) => row.course_id)) : 0;
+    const newId = highestId + 1;
+
+    setRows((oldRows) => [
+      ...oldRows,
       {
-        label: "SDG Predictions",
-        data: [], // Initialize with empty array
-        borderColor: "rgba(0, 51, 153, 1)", // Deep blue color
-        backgroundColor: "rgba(0, 153, 51, 0.5)", // Bright green color with 50% opacity
-        pointStyle: "circle",
-        pointRadius: 10,
-        pointHoverRadius: 15,
+        id: newId,
+        course_id: newId,
+        course_name: "",
+        course_capacity: 0,
+        course_duration: 0,
+        course_aim: "",
+        course_start_date: dayjs().toISOString(),
+        course_end_date: dayjs().add(1, "month").toISOString(),
+        center_id: "",
+        isNew: true,
       },
-    ],
-  });
+    ]);
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [newId]: { mode: GridRowModes.Edit, fieldToFocus: "course_name" },
+    }));
+  };
 
-  const [pointStyle, setPointStyle] = useState("crossRot");
+  return (
+    <GridToolbarContainer>
+      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+        Add record
+      </Button>
+    </GridToolbarContainer>
+  );
+}
+
+function CourseGrid() {
+  const [rows, setRows] = React.useState(initialRows);
+  const [rowModesModel, setRowModesModel] = React.useState({});
+  const [centers, setCenters] = React.useState([]);
+  const dataGridRef = useRef(null);
 
   useEffect(() => {
-    if (chartRef.current) {
-      chartRef.current.chartInstance.update();
-    }
-  }, [pointStyle]);
+    const fetchProgramDetails = async () => {
+      try {
+        const response = await fetch("/view_program_details?program_id=9");
+        const data = await response.json();
+        console.log("Program details data:", data);
 
-  const config = {
-    responsive: true,
-    plugins: {
-      title: {
-        display: false,
-        text: `Point Style: ${pointStyle}`,
+        const transformedRows = data.centers.flatMap((center) =>
+          center.courses.map((course) => ({
+            id: course.course_id,
+            course_id: course.course_id,
+            course_name: course.course_name,
+            course_capacity: course.course_capacity,
+            course_duration: course.course_duration,
+            course_aim: course.course_aim,
+            course_start_date: course.course_start_date,
+            course_end_date: course.course_end_date,
+            center_id: center.center_id,
+            center_name: center.center_name,
+          }))
+        );
+        console.log("Transformed Rows:", transformedRows);
+
+        setRows(transformedRows);
+      } catch (error) {
+        console.error("Error fetching program details:", error);
+      }
+    };
+
+    fetchProgramDetails();
+  }, []);
+
+  useEffect(() => {
+    const fetchCenters = async () => {
+      try {
+        const response = await fetch("/view_center_data?program_id=9");
+        const centerData = await response.json();
+        console.log("Center data:", centerData);
+
+        const allCenters = centerData.map((center) => ({
+          value: center[0],
+          label: center[1],
+        }));
+        console.log("All Centers:", allCenters);
+
+        setCenters(allCenters);
+      } catch (error) {
+        console.error("Error fetching centers:", error);
+      }
+    };
+
+    fetchCenters();
+  }, []);
+
+  const handleRowEditStop = (params, event) => {
+    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+      event.defaultMuiPrevented = true;
+    }
+  };
+
+  const handleRowEditCommit = (params) => {
+    const { id, field, value } = params;
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === id ? { ...row, [field]: value } : row))
+    );
+  };
+
+  const handleEditClick = (id) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+  };
+
+  const handleSaveClick = (id) => async () => {
+    if (!dataGridRef.current) {
+      console.error("DataGrid reference is not available.");
+      return;
+    }
+    const apiRef = dataGridRef.current.apiRef.current;
+    if (!apiRef) {
+      console.error("apiRef is not available.");
+      return;
+    }
+    apiRef.stopCellEditMode({ id });
+
+    const rowToSave = rows.find((row) => row.id === id);
+    console.log("Data to be saved:", rowToSave);
+    if (validateRow(rowToSave)) {
+      try {
+        const updatedRow = await processRowUpdate(rowToSave);
+        setRowModesModel({
+          ...rowModesModel,
+          [id]: { mode: GridRowModes.View },
+        });
+        setRows((prevRows) =>
+          prevRows.map((row) => (row.id === id ? updatedRow : row))
+        );
+      } catch (error) {
+        console.error("Error saving course:", error);
+      }
+    } else {
+      console.error("Invalid data:", rowToSave);
+      alert("Please fill in all required fields before saving.");
+    }
+  };
+
+  const handleDeleteClick = (id) => async () => {
+    try {
+      await deleteCourse(id);
+      setRows((oldRows) => oldRows.filter((row) => row.id !== id));
+    } catch (error) {
+      console.error("Error deleting course:", error);
+    }
+  };
+
+  const handleCancelClick = (id) => () => {
+    setRowModesModel({
+      ...rowModesModel,
+      [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    });
+
+    const editedRow = rows.find((row) => row.id === id);
+    if (editedRow.isNew) {
+      setRows(rows.filter((row) => row.id !== id));
+    }
+  };
+
+  const processRowUpdate = async (newRow) => {
+    const updatedRow = { ...newRow, isNew: false };
+    console.log("Row update:", updatedRow);
+    try {
+      if (newRow.isNew) {
+        const addedCourse = await addCourse(updatedRow);
+        setRows((prevRows) =>
+          prevRows.map((row) => (row.id === newRow.id ? addedCourse : row))
+        );
+        return addedCourse;
+      } else {
+        await editCourse(updatedRow);
+        setRows((prevRows) =>
+          prevRows.map((row) => (row.id === newRow.id ? updatedRow : row))
+        );
+        return updatedRow;
+      }
+    } catch (error) {
+      console.error(error);
+      return rows.find((row) => row.id === newRow.id);
+    }
+  };
+
+  const handleRowModesModelChange = (newRowModesModel) => {
+    setRowModesModel(newRowModesModel);
+  };
+
+  const editCourse = async (updatedRow) => {
+    try {
+      const response = await fetch("/edit_course", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          course_id: updatedRow.course_id,
+          course_name: updatedRow.course_name,
+          course_capacity: updatedRow.course_capacity,
+          course_duration: updatedRow.course_duration,
+          course_aim: updatedRow.course_aim,
+          course_start_date: updatedRow.course_start_date,
+          course_end_date: updatedRow.course_end_date,
+          center_id: updatedRow.center_id,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update course");
+      }
+
+      console.log("Course updated successfully:", data);
+      return data;
+    } catch (error) {
+      console.error("Error updating course:", error);
+      throw error;
+    }
+  };
+
+  const addCourse = async (newCourse) => {
+    console.log("Data being added:", newCourse);
+    try {
+      const response = await fetch("/add_course", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...newCourse,
+          program_id: 9, // Assuming program_id is 9, or change accordingly
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to add course");
+      }
+
+      console.log("Course added successfully:", data);
+      return {
+        ...data,
+        id: data.course_id, // Use the course_id from the backend
+      };
+    } catch (error) {
+      console.error("Error adding course:", error);
+      throw error;
+    }
+  };
+
+  const deleteCourse = async (course_id) => {
+    try {
+      const response = await fetch("/delete_course", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ course_id }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete course");
+      }
+
+      console.log("Course deleted successfully:", data);
+      return data;
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      throw error;
+    }
+  };
+
+  const validateRow = (row) => {
+    console.log("Validating row:", row);
+    return (
+      row.course_name !== "" &&
+      row.course_capacity > 0 &&
+      row.course_duration > 0 &&
+      row.center_id !== ""
+    );
+  };
+
+  const columns = [
+    {
+      field: "course_id",
+      headerName: "Course ID",
+      width: 100,
+      editable: false,
+    },
+    {
+      field: "course_name",
+      headerName: "Course Name",
+      width: 180,
+      editable: true,
+    },
+    {
+      field: "course_capacity",
+      headerName: "Course Capacity",
+      type: "number",
+      width: 150,
+      align: "left",
+      headerAlign: "left",
+      editable: true,
+    },
+    {
+      field: "course_duration",
+      headerName: "Course Duration",
+      type: "number",
+      width: 150,
+      align: "left",
+      headerAlign: "left",
+      editable: true,
+    },
+    {
+      field: "course_aim",
+      headerName: "Course Aim",
+      width: 300,
+      editable: true,
+    },
+    {
+      field: "course_start_date",
+      headerName: "Course Start Date",
+      width: 180,
+      editable: true,
+      renderCell: (params) => {
+        return params.value ? dayjs(params.value).format("MM/DD/YYYY") : "";
+      },
+      renderEditCell: (params) => (
+        <DatePicker
+          value={params.value ? dayjs(params.value) : null}
+          onChange={(newValue) =>
+            params.api.setEditCellValue({
+              id: params.id,
+              field: params.field,
+              value: newValue ? newValue.toISOString() : "",
+            })
+          }
+          format="MM/DD/YYYY"
+        />
+      ),
+    },
+    {
+      field: "course_end_date",
+      headerName: "Course End Date",
+      width: 180,
+      editable: true,
+      renderCell: (params) => {
+        return params.value ? dayjs(params.value).format("MM/DD/YYYY") : "";
+      },
+      renderEditCell: (params) => (
+        <DatePicker
+          value={params.value ? dayjs(params.value) : null}
+          onChange={(newValue) =>
+            params.api.setEditCellValue({
+              id: params.id,
+              field: params.field,
+              value: newValue ? newValue.toISOString() : "",
+            })
+          }
+          format="MM/DD/YYYY"
+        />
+      ),
+    },
+    {
+      field: "center_id",
+      headerName: "Center",
+      width: 220,
+      editable: true,
+      type: "singleSelect",
+      valueOptions: centers,
+      renderCell: (params) => {
+        const center = centers.find((center) => center.value === params.value);
+        return center ? center.label : params.value;
+      },
+      renderEditCell: (params) => {
+        return (
+          <select
+            value={params.value || ""}
+            onChange={(e) => {
+              params.api.setEditCellValue({
+                id: params.id,
+                field: params.field,
+                value: e.target.value,
+              });
+            }}
+          >
+            {centers.map((center) => (
+              <option key={center.value} value={center.value}>
+                {center.label}
+              </option>
+            ))}
+          </select>
+        );
       },
     },
-  };
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 100,
+      cellClassName: "actions",
+      getActions: ({ id }) => {
+        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
-  const actions = [
-    "circle",
-    "cross",
-    "crossRot",
-    "dash",
-    "line",
-    "rect",
-    "rectRounded",
-    "rectRot",
-    "star",
-    "triangle",
-    false,
-  ];
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              icon={<SaveIcon />}
+              label="Save"
+              sx={{
+                color: "primary.main",
+              }}
+              onClick={handleSaveClick(id)}
+            />,
+            <GridActionsCellItem
+              icon={<CancelIcon />}
+              label="Cancel"
+              className="textPrimary"
+              onClick={handleCancelClick(id)}
+              color="inherit"
+            />,
+          ];
+        }
 
-  const [extractedText, setExtractedText] = useState("");
-  const [processedText, setProcessedText] = useState("");
-
-  const [fileUploaded, setFileUploaded] = useState(false); // State variable to track whether a file has been uploaded
-
-  const [type, setType] = React.useState("");
-
-  const handleChange = (event) => {
-    setType(event.target.value);
-  };
-
-  const fileInputRef = useRef(null);
-
-  const [activeStep, setActiveStep] = React.useState(0);
-
-  const [showImage, setShowImage] = useState(false);
-  const [showgraph, setShowgraph] = useState(false);
-  const [stopSpinning, setStopSpinning] = useState(false);
-  const [selectedImage, setSelectedImage] = useState("");
-  const [sentiment, setSentiment] = useState("");
-  const [keyphrases, setKeyphrases] = useState([]);
-
-  const handleNext = (event) => {
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-
-    // create a variable
-
-    // Check the active step and perform different actions accordingly
-    if (activeStep === 0) {
-      // Trigger file upload logic when the "Next" button is clicked for step 1
-      if (type === "plain_text") {
-        handlePlainTextNext(event); // Call the function for "Plain text" option
-      } else if (type === "whatsapp_chat") {
-        console.log("this is a whatsapp chat");
-        handleWhatsAppSubmit(event); // Call the function "WhatsApp Chat" options
-      } else {
-        handleSubmit(event); // Call the function for "PDF"
-      }
-    } else if (activeStep === 1) {
-      // Handle next button action for step 2
-      // For example, call a different API or perform another action
-      handleStep2Next(event);
-    } else if (activeStep === 2) {
-      // Handle next button action for step 3
-      // For example, call a different API or perform another action
-      // handleStep3Next(event);
-    }
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
-
-  // Function to handle "Next" button action for "Plain text" option
-  const handlePlainTextNext = (event) => {
-    // Your custom logic here for "Plain text" option
-  };
-
-  const handleFileChange = (event) => {
-    if (event.target.files.length > 0) {
-      setFileUploaded(true);
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
-
-    const formData = new FormData(); // Create a new FormData object
-
-    // Append file to FormData object
-    formData.append("file", fileInputRef.current.files[0]); // Assuming fileInputRef is a ref to your file input element
-
-    try {
-      // Make HTTP POST request to your backend API
-      const response = await axios.post("/upload_file", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data", // Set the content type to multipart/form-data
-        },
-      });
-
-      console.log("File uploaded successfully:", response.data);
-
-      // Access the extracted text from the response
-      const extractedText = response.data.text;
-      console.log("Extracted text:", extractedText);
-
-      // Update the extractedText state with the extracted text
-      setExtractedText(extractedText);
-
-      // Now you can use the extracted text in your React component as needed
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      // Handle error if needed
-    }
-  };
-
-  const handleWhatsAppSubmit = async (event) => {
-    event.preventDefault();
-
-    try {
-      const formData = new FormData();
-      formData.append("file", fileInputRef.current.files[0]); // Assuming fileInputRef is a ref to your file input element
-
-      // Make HTTP POST request to your backend API
-      const response = await axios.post("/whatsapp_text", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      // Access the processed text from the response
-      const extractedText = response.data.text;
-      console.log("Extracted text:", extractedText);
-
-      // Update the extractedText state with the extracted text
-      setExtractedText(extractedText);
-    } catch (error) {
-      console.error("Error processing text:", error);
-      // Handle error if needed
-    }
-  };
-
-  const handleStep2Next = async (event) => {
-    event.preventDefault();
-
-    try {
-      // Make HTTP POST request to your backend API
-      const response = await axios.post("/process_text", {
-        text: extractedText,
-      });
-
-      // Access the processed text from the response
-      const processedText = response.data.text;
-      console.log("Processed text:", processedText);
-
-      // Access the processed text from the response
-      const predicted_sentiment = response.data.sentiment;
-      console.log("Predicted sentiment:", predicted_sentiment);
-
-      // Set the predicted sentiment
-      setSentiment(predicted_sentiment);
-
-      // Access the predictions from the response
-      const predictions = response.data.predictions;
-      console.log("predictions:", predictions);
-
-      // Access the keyphrases from the response
-      const keyphrases = response.data.keyphrases;
-      console.log("Keyphrases:", keyphrases);
-
-      // Set the keyphrases in your state
-      setKeyphrases(keyphrases);
-
-      // Extract labels and data from predictions
-      const labels = Object.keys(predictions);
-      const data = Object.values(predictions);
-
-      // Sort predictions by score in descending order
-      const sortedPredictions = labels
-        .map((label, index) => ({
-          label,
-          score: data[index],
-        }))
-        .sort((a, b) => b.score - a.score);
-
-      console.log("Sorted Predictions:", sortedPredictions);
-
-      // Select the image based on the highest prediction score
-      const selectedImageKey = sortedPredictions[0].label;
-      console.log(selectedImageKey);
-      setSelectedImage(selectedImageKey); // Set the selected image key
-
-      setShowgraph(true);
-      setShowImage(true);
-      setStopSpinning(true);
-
-      // Update chartData state with new sorted labels and data
-      setChartData({
-        labels: sortedPredictions.map((prediction) => prediction.label),
-        datasets: [
-          {
-            label: "SDG Predictions",
-            data: sortedPredictions.map((prediction) => prediction.score),
-            borderColor: "rgba(0, 51, 153, 1)", // Deep blue color
-            backgroundColor: "rgba(0, 153, 51, 0.5)", // Bright green color with 50% opacity
-            pointStyle: "circle",
-            pointRadius: 10,
-            pointHoverRadius: 15,
-          },
-        ],
-      });
-    } catch (error) {
-      console.error("Error processing text:", error);
-      // Handle error if needed
-    }
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  // useEffect(() => {
-  //   // Set showImage to true after a delay to trigger the animation
-  //   const timeout = setTimeout(() => {
-  //     setShowgraph(true);
-  //     setShowImage(true);
-  //   }, 15000); // 20 seconds delay
-
-  //   // Stop spinning after 20 seconds
-  //   const stopTimeout = setTimeout(() => {
-  //     setStopSpinning(true);
-  //   }, 15000); // 20 seconds delay
-
-  //   return () => {
-  //     clearTimeout(timeout);
-  //     clearTimeout(stopTimeout);
-  //   };
-  // }, []);
-
-  const ferrisOfTechs = [
-    "SDG 1.png",
-    "SDG 2.png",
-    "SDG 3.png",
-    "SDG 4.png",
-    "SDG 5.png",
-    "SDG 6.png",
-    "SDG 7.png",
-    "SDG 8.png",
-    "SDG 9.png",
-    "SDG 10.png",
-    "SDG 11.png",
-    "SDG 12.png",
-    "SDG 13.png",
-    "SDG 14.png",
-    "SDG 15.png",
-    "SDG 16.png",
-    "SDG 17.png",
+        return [
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={handleEditClick(id)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={handleDeleteClick(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
   ];
 
   return (
     <Fragment>
-      <>
-        {/*  Body Wrapper */}
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
         <div
           className="page-wrapper"
           id="main-wrapper"
@@ -344,389 +487,46 @@ function TextAnalysisNew() {
           data-sidebar-position="fixed"
           data-header-position="fixed"
         >
-          {/* Sidebar Start */}
-          <Nav></Nav>
-          {/*  Sidebar End */}
-          {/*  Main wrapper */}
+          <Nav />
           <div className="body-wrapper">
-            {/*  Header Start */}
-            <Header></Header>
-            {/*  Header End */}
+            <Header />
             <div className="container-fluid">
-              <div className="container-fluid">
-                <div className="card">
-                  <div className="card-body">
-                    <h5 className="card-title fw-semibold mb-4">
-                      Text Analysis
-                    </h5>
-                    <div className="card mb-0">
-                      <div className="card-body p-4">
-                        <Box sx={{ width: "100%" }}>
-                          <Stepper activeStep={activeStep}>
-                            {steps.map((label, index) => {
-                              const stepProps = {};
-                              const labelProps = {};
-
-                              return (
-                                <Step key={label} {...stepProps}>
-                                  <StepLabel {...labelProps}>{label}</StepLabel>
-                                </Step>
-                              );
-                            })}
-                          </Stepper>
-                          {activeStep === steps.length ? (
-                            <React.Fragment>
-                              <Typography sx={{ mt: 2, mb: 1 }}>
-                                All steps completed - you&apos;re finished
-                              </Typography>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  pt: 2,
-                                }}
-                              >
-                                <Box sx={{ flex: "1 1 auto" }} />
-                                <Button onClick={handleReset}>Reset</Button>
-                              </Box>
-                            </React.Fragment>
-                          ) : (
-                            <React.Fragment>
-                              {activeStep !== 2 && (
-                                <Typography
-                                  sx={{ mt: 10, textAlign: "center" }}
-                                >
-                                  Step {activeStep + 1}
-                                </Typography>
-                              )}
-                              <Box
-                                sx={{
-                                  pt: 2,
-                                }}
-                              >
-                                {activeStep === 0 ? (
-                                  <React.Fragment>
-                                    {/* Step 1 */}
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        alignItems: "center",
-                                        textAlign: "center",
-                                      }}
-                                    >
-                                      <FormControl sx={{ m: 1 }}>
-                                        <InputLabel id="demo-simple-select-label">
-                                          Type
-                                        </InputLabel>
-                                        <Select
-                                          sx={{ width: 200 }}
-                                          labelId="demo-simple-select-label"
-                                          id="demo-simple-select"
-                                          value={type}
-                                          label="Type"
-                                          onChange={handleChange}
-                                        >
-                                          <MenuItem value="plain_text">
-                                            Plain text
-                                          </MenuItem>
-                                          <MenuItem value="pdf">PDF</MenuItem>
-                                          <MenuItem value="whatsapp_chat">
-                                            WhatsApp Chat
-                                          </MenuItem>
-                                        </Select>
-                                      </FormControl>
-                                      {type === "pdf" ||
-                                      type === "whatsapp_chat" ? (
-                                        <label
-                                          htmlFor="file-upload"
-                                          style={{ margin: "8px" }}
-                                        >
-                                          <Button
-                                            variant="contained"
-                                            component="span"
-                                            sx={{ m: 1 }}
-                                          >
-                                            Upload
-                                          </Button>
-                                          <input
-                                            id="file-upload"
-                                            type="file"
-                                            hidden
-                                            ref={fileInputRef}
-                                            onChange={handleFileChange}
-                                          />
-                                        </label>
-                                      ) : null}
-                                      {/* Conditionally render a message if a file has been uploaded */}
-                                      {fileUploaded && (
-                                        <p>
-                                          File uploaded successfully. Click
-                                          Next!
-                                        </p>
-                                      )}
-                                    </Box>
-
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        pt: 2,
-                                      }}
-                                    >
-                                      <Button
-                                        color="inherit"
-                                        disabled={activeStep === 0}
-                                        onClick={handleBack}
-                                        sx={{ mr: 1 }}
-                                      >
-                                        Back
-                                      </Button>
-                                      <Box sx={{ flex: "1 1 auto" }} />
-                                      <Button
-                                        onClick={(event) => handleNext(event)}
-                                      >
-                                        Next
-                                      </Button>
-                                    </Box>
-                                  </React.Fragment>
-                                ) : null}
-                                {activeStep === 1 ? (
-                                  // Step 2
-                                  <React.Fragment>
-                                    <Box
-                                      component="form"
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        "& .MuiTextField-root": {
-                                          m: 1,
-                                          width: "100ch",
-                                          textAlign: "center",
-                                        },
-                                      }}
-                                      noValidate
-                                      autoComplete="off"
-                                    >
-                                      <div>
-                                        <TextField
-                                          id="outlined-multiline-static"
-                                          label="Text to Analyse"
-                                          multiline
-                                          rows={10}
-                                          value={extractedText}
-                                          onChange={(e) =>
-                                            setExtractedText(e.target.value)
-                                          }
-                                        />
-                                      </div>
-                                    </Box>
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        pt: 2,
-                                      }}
-                                    >
-                                      <Button
-                                        color="inherit"
-                                        disabled={activeStep === 0}
-                                        onClick={handleBack}
-                                        sx={{ mr: 1 }}
-                                      >
-                                        Back
-                                      </Button>
-                                      <Box sx={{ flex: "1 1 auto" }} />
-                                      <Button
-                                        onClick={(event) => handleNext(event)}
-                                      >
-                                        Next
-                                      </Button>
-                                    </Box>
-                                  </React.Fragment>
-                                ) : null}
-
-                                {activeStep === 2 ? (
-                                  // Step 3
-                                  <div>
-                                    <br></br>
-                                    <br></br>
-                                    <br></br>
-                                    {stopSpinning && (
-                                      <div className="row">
-                                        <div className="col-md-4 d-flex">
-                                          <div className="card flex-fill">
-                                            <div className="card-body d-flex flex-column">
-                                              <h5 className="text-center">
-                                                Sentiment Analysis
-                                              </h5>
-                                              <div className="flex-grow-1 d-flex justify-content-center align-items-center">
-                                                {sentiment && (
-                                                  <button
-                                                    type="button"
-                                                    className={`btn w-100 m-1 ${
-                                                      sentiment === "positive"
-                                                        ? "btn-success"
-                                                        : "btn-danger"
-                                                    }`}
-                                                  >
-                                                    {sentiment === "positive"
-                                                      ? "Positive"
-                                                      : "Danger"}
-                                                  </button>
-                                                )}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        <div className="col-md-4 d-flex">
-                                          <div className="card flex-fill">
-                                            <div className="card-body d-flex flex-column">
-                                              <h5 className="text-center">
-                                                SDG Classification
-                                              </h5>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        <div className="col-md-4 d-flex">
-                                          <div className="card flex-fill">
-                                            <div className="card-body d-flex flex-column">
-                                              <h5 className="text-center">
-                                                Keyword Extraction
-                                              </h5>
-                                              <br />
-                                              <br />
-                                              <div className="d-flex flex-wrap">
-                                                {keyphrases.map(
-                                                  (keyword, index) => (
-                                                    <button
-                                                      key={index}
-                                                      type="button"
-                                                      className="btn btn-outline-primary m-1"
-                                                      style={{
-                                                        flex: "1 0 30%",
-                                                      }}
-                                                    >
-                                                      {keyword}
-                                                    </button>
-                                                  )
-                                                )}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                    {ferrisOfTechs.map((tech, index) => (
-                                      <motion.div
-                                        className="ferris-wheel-techs"
-                                        key={index + 1}
-                                        initial="initial"
-                                        animate={
-                                          stopSpinning
-                                            ? "stop"
-                                            : ["animate", "initialHide"]
-                                        }
-                                        variants={{
-                                          initial: {
-                                            opacity: 0,
-                                          },
-                                          initialHide: {
-                                            opacity: 1,
-                                            transition: {
-                                              delay: index + 1,
-                                            },
-                                          },
-                                          animate: {
-                                            rotate: -360,
-                                            transition: {
-                                              duration: ferrisOfTechs.length,
-                                              repeat: Infinity,
-                                              delay: index + 1,
-                                              ease: "linear",
-                                            },
-                                          },
-                                          stop: {
-                                            rotate: -360, // Keep the last position
-                                            transition: {
-                                              duration: 0,
-                                            },
-                                          },
-                                        }}
-                                      >
-                                        <div className="image-parent">
-                                          <img
-                                            className="tech-icon"
-                                            src={require(`../../public/assets/images/sdgs/${tech}`)}
-                                            alt={tech}
-                                          />
-                                        </div>
-                                      </motion.div>
-                                    ))}
-
-                                    <div
-                                      className={`image-shown ${
-                                        showImage ? "show" : ""
-                                      }`}
-                                    >
-                                      <img
-                                        className="tech-shown"
-                                        src={
-                                          selectedImage
-                                            ? require(`../../public/assets/images/sdgs/${selectedImage}.png`)
-                                            : ""
-                                        }
-                                        alt="Selected Image"
-                                      />
-                                    </div>
-
-                                    <div className="chart-container-output">
-                                      <div
-                                        className={`chart-line-output ${
-                                          showgraph ? "show" : ""
-                                        }`}
-                                        style={{ height: "600px" }}
-                                      >
-                                        <Line
-                                          ref={chartRef}
-                                          data={chartData}
-                                          options={config}
-                                        />
-                                      </div>
-                                    </div>
-                                    <Box
-                                      sx={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        pt: 2,
-                                      }}
-                                    >
-                                      <Button
-                                        color="inherit"
-                                        disabled={activeStep === 0}
-                                        onClick={handleBack}
-                                        sx={{ mr: 1 }}
-                                      >
-                                        Back
-                                      </Button>
-                                      <Box sx={{ flex: "1 1 auto" }} />
-                                      <Button onClick={handleNext}>
-                                        {activeStep === steps.length - 1
-                                          ? "Finish"
-                                          : "Next"}
-                                      </Button>
-                                    </Box>
-                                  </div>
-                                ) : null}
-                              </Box>
-                            </React.Fragment>
-                          )}
-                        </Box>
-                      </div>
+              <div className="card">
+                <div className="card-body">
+                  <h5 className="card-title fw-semibold mb-4">Courses</h5>
+                  <div className="card">
+                    <div className="card-body p-4">
+                      <Box
+                        sx={{
+                          height: 500,
+                          width: "100%",
+                          "& .actions": {
+                            color: "text.secondary",
+                          },
+                          "& .textPrimary": {
+                            color: "text.primary",
+                          },
+                        }}
+                      >
+                        <DataGrid
+                          ref={dataGridRef}
+                          rows={rows}
+                          columns={columns}
+                          editMode="row"
+                          rowModesModel={rowModesModel}
+                          onRowModesModelChange={handleRowModesModelChange}
+                          onRowEditStop={handleRowEditStop}
+                          onCellEditCommit={handleRowEditCommit}
+                          processRowUpdate={processRowUpdate}
+                          slots={{
+                            toolbar: EditToolbar,
+                          }}
+                          slotProps={{
+                            toolbar: { rows, setRows, setRowModesModel },
+                          }}
+                          getRowId={(row) => row.id}
+                        />
+                      </Box>
                     </div>
                   </div>
                 </div>
@@ -734,9 +534,9 @@ function TextAnalysisNew() {
             </div>
           </div>
         </div>
-      </>
+      </LocalizationProvider>
     </Fragment>
   );
 }
 
-export default TextAnalysisNew;
+export default CourseGrid;

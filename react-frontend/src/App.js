@@ -19,6 +19,9 @@ import ViewManager from "./pages/ViewManager";
 import ViewTrainer from "./pages/ViewTrainer";
 import SampleNew from "./pages/SampleNew";
 import ProjectConfig from "./pages/ProjectConfig";
+import TextAnalysis from "./pages/TextAnalysis";
+import AddCenter from "./pages/AddCenter";
+import CenterConfig from "./pages/CenterConfig";
 
 import { UserProvider } from "./services/UserContext"; // Import UserProvider from UserContext
 
@@ -50,6 +53,9 @@ function App() {
             <Route path="/ViewTrainer" element={<ViewTrainer />} />
             <Route path="/SampleNew" element={<SampleNew />} />
             <Route path="/ProjectConfig" element={<ProjectConfig />} />
+            <Route path="/TextAnalysis" element={<TextAnalysis />} />
+            <Route path="/AddCenter" element={<AddCenter />} />
+            <Route path="/CenterConfig" element={<CenterConfig />} />
           </Routes>
         </UserProvider>
       </Router>
