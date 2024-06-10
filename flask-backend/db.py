@@ -20,7 +20,7 @@ def connect_to_database():
             break
         except Exception as e:
             if time.time() - start_time >= 120:  # Timeout after 2 minutes
-                print("Database connection failed:", e)
+                print("Database connection failed. Error message:", e)
                 break
             time.sleep(1)  # Retry every 1 second
 
