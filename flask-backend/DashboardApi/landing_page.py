@@ -8,8 +8,8 @@ view_trainer_api = Blueprint('view_trainer_api', __name__)
 view_trainee_api = Blueprint('view_trainee_api', __name__)
 view_program_count_api = Blueprint('view_program_count_api', __name__)
 view_program_name_api = Blueprint('view_program_name_api', __name__)
-
-
+view_center_count_api = Blueprint('view_center_count_api', __name__)
+view_course_count_api = Blueprint('view_course_count_api', __name__)
 
 @view_manager_api.route("/view_manager_data")
 def view_manager_data():
@@ -99,6 +99,56 @@ def view_program_count():
 
         # Check if the table exists
         cursor.execute('SELECT COUNT(*) FROM public."Programs"')
+
+        # Fetch the data from the table
+        data = cursor.fetchall()
+
+        # Close the cursor
+        cursor.close()
+
+        # Return the data as JSON response
+        return jsonify({"data": data})
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    
+@view_center_count_api.route("/view_center_count")
+def view_center_count():
+    try:
+        # Check if the connection is established
+        if cnx is None:
+            return jsonify({"error": "Database connection is not established."})
+
+        # Create a cursor object
+        cursor = cnx.cursor()
+
+        # Check if the table exists
+        cursor.execute('SELECT COUNT(*) FROM public."ProgramCenters"')
+
+        # Fetch the data from the table
+        data = cursor.fetchall()
+
+        # Close the cursor
+        cursor.close()
+
+        # Return the data as JSON response
+        return jsonify({"data": data})
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    
+@view_course_count_api.route("/view_course_count")
+def view_course_count():
+    try:
+        # Check if the connection is established
+        if cnx is None:
+            return jsonify({"error": "Database connection is not established."})
+
+        # Create a cursor object
+        cursor = cnx.cursor()
+
+        # Check if the table exists
+        cursor.execute('SELECT COUNT(*) FROM public."Courses"')
 
         # Fetch the data from the table
         data = cursor.fetchall()

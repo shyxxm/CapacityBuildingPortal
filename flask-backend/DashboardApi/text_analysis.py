@@ -9,20 +9,13 @@ import regex as re
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModelForTokenClassification, pipeline
 import numpy as np
-
-# Debugging: Print current working directory and check .env file existence
-print(f"Current working directory: {os.getcwd()}")
-print(f".env file exists: {os.path.isfile('.env')}")
+import string
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Retrieve the OpenAI API key from environment variables
 api_key = os.getenv('OPENAI_API_KEY')
-if not api_key:
-    raise ValueError("API key not found. Please set the OPENAI_API_KEY environment variable.")
-else:
-    print(f"API key loaded: {api_key[:5]}...")  # Print the first few characters for confirmation
 
 # Initialize the OpenAI API client
 openai.api_key = api_key
@@ -82,7 +75,7 @@ def process_text():
 
         # Call the function to analyze text
         keyphrases = extract_keyphrases(joined)
-        sorted_sdg_scores = analyze_text(joined)
+        sorted_sdg_scores, important_words = analyze_text(joined)
         predicted_sentiment = predict_sentiment(joined)
         sdg, keywords, sentiment, sdg_scores, most_likely_sdg = chatgpt(joined)
 
@@ -90,6 +83,7 @@ def process_text():
             'message': 'Text processed successfully',
             'text': joined,
             'predictions': sorted_sdg_scores,
+            'important_words': important_words,
             'sentiment': predicted_sentiment,
             'keyphrases': list(keyphrases),
             'chatgpt_sdg': sdg,
@@ -105,19 +99,53 @@ def process_text():
 def analyze_text(joined):
     inputs = tokenizer(joined, return_tensors="pt", padding=True, truncation=True)
     with torch.no_grad():
-        outputs = model(**inputs)
+        outputs = model(**inputs, output_attentions=True)
         logits = outputs.logits
+        attentions = outputs.attentions  # This contains the attention weights
 
         # Check for NaN values in the logits
         if torch.isnan(logits).any():
             print("Warning: NaN values detected in the logits.")
-            return
+            return None, []
 
         predictions = torch.softmax(logits, dim=1)[0]
-        sdg_scores = {f"SDG {idx + 1}": score.item() for idx, score in enumerate(predictions)}
-        sorted_sdg_scores = dict(sorted(sdg_scores.items(), key=lambda item: item[1], reverse=True))
 
-    return sorted_sdg_scores
+        # Extract attention weights from the last layer
+        last_layer_attentions = attentions[-1]
+        # Take the mean attention weights across all heads
+        mean_attentions = last_layer_attentions.mean(dim=1).squeeze()
+
+        # Get the token indices with the highest attention weights
+        important_tokens = mean_attentions.mean(dim=0).topk(k=10).indices
+
+        # Convert token indices to words and filter out special tokens
+        tokens = tokenizer.convert_ids_to_tokens(inputs['input_ids'][0])
+        important_words = []
+        for idx in important_tokens:
+            token = tokens[idx]
+            if token in tokenizer.all_special_tokens or not token.isalnum():
+                continue
+            if token.startswith("##"):
+                original_word_part = token[2:]
+                for word in joined.split():
+                    if original_word_part in word:
+                        important_words.append(word)
+                        break
+            else:
+                important_words.append(token)
+
+        # Remove duplicates while preserving order
+        final_words = []
+        seen_words = set()
+        for word in important_words:
+            if word not in seen_words:
+                final_words.append(word)
+                seen_words.add(word)
+
+        # Limit to the first 15 most important words
+        final_words = final_words[:15]
+
+    return predictions, final_words
 
 # Define the function to predict sentiment
 def predict_sentiment(joined):

@@ -15,88 +15,124 @@ import ImpleTime from "../charts/Timeline/Implementation.tsx";
 import { useNavigate, Link } from "react-router-dom";
 
 function Main() {
-
   const [chartData, setChartData] = useState({ data: [[]] });
   const [programData, setProgramData] = useState({ data: [[]] });
   const [programName, setProgramName] = useState({ data: [[]] });
-
-
+  const [courseData, setCourseData] = useState({ data: [[]] });
+  const [centerData, setCenterData] = useState({ data: [[]] });
 
   // function to fetch data
   const fetchData = () => {
-    fetch('/view_trainer_data')
-      .then(res => {
+    fetch("/view_trainer_data")
+      .then((res) => {
         if (res.ok) {
           return res.json();
         } else {
-          throw new Error('Server response not OK');
+          throw new Error("Server response not OK");
         }
       })
-      .then(chartData => {
+      .then((chartData) => {
         setChartData(chartData);
       })
-      .catch(error => {
-        console.error('Error fetching data:', error);
+      .catch((error) => {
+        console.error("Error fetching data:", error);
       });
   };
 
-    // function to fetch data
-    const fetchProgramData = () => {
-      fetch('/view_program_count')
-        .then(res => {
-          if (res.ok) {
-            return res.json();
-          } else {
-            throw new Error('Server response not OK');
-          }
-        })
-        .then(programData => {
-          setProgramData(programData);
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error);
-        });
+  const fetchCourseData = () => {
+    fetch("/view_course_count")
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error("Server response not OK");
+        }
+      })
+      .then((courseData) => {
+        setCourseData(courseData);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
+  const fetchCenterData = () => {
+    fetch("/view_center_count")
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error("Server response not OK");
+        }
+      })
+      .then((centerData) => {
+        setCenterData(centerData);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
+  // function to fetch data
+  const fetchProgramData = () => {
+    fetch("/view_program_count")
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error("Server response not OK");
+        }
+      })
+      .then((programData) => {
+        setProgramData(programData);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
+  // function to fetch data
+  const fetchProgramName = () => {
+    fetch("/view_program_name")
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error("Server response not OK");
+        }
+      })
+      .then((programName) => {
+        setProgramName(programName);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
+  useEffect(() => {
+    // Call fetchData and fetchProgramData immediately on component mount
+    fetchData();
+    fetchProgramData();
+    fetchProgramName();
+    fetchCourseData();
+    fetchCenterData();
+
+    // Set up a periodic fetch
+    const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+    const intervalProgramId = setInterval(fetchProgramData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+    const intervalProgramName = setInterval(fetchProgramName, 5000); // Fetch every 5000 milliseconds (5 seconds)
+    const intervalCourse = setInterval(fetchCourseData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+    const intervalCenter = setInterval(fetchCenterData, 5000); // Fetch every 5000 milliseconds (5 seconds)
+
+    // Clear intervals on component unmount
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(intervalProgramId);
+      clearInterval(intervalProgramName);
+      clearInterval(intervalCourse);
+      clearInterval(intervalCenter);
     };
-
-        // function to fetch data
-        const fetchProgramName = () => {
-          fetch('/view_program_name')
-            .then(res => {
-              if (res.ok) {
-                return res.json();
-              } else {
-                throw new Error('Server response not OK');
-              }
-            })
-            .then(programName => {
-              setProgramName(programName);
-            })
-            .catch(error => {
-              console.error('Error fetching data:', error);
-            });
-        };
-
-    useEffect(() => {
-      // Call fetchData and fetchProgramData immediately on component mount
-      fetchData();
-      fetchProgramData();
-      fetchProgramName();
-    
-      // Set up a periodic fetch
-      const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
-      const intervalProgramId = setInterval(fetchProgramData, 5000); // Fetch every 5000 milliseconds (5 seconds)
-      const intervalProgramName= setInterval(fetchProgramName, 5000); // Fetch every 5000 milliseconds (5 seconds)
-
-    
-      // Clear intervals on component unmount
-      return () => {
-        clearInterval(intervalId);
-        clearInterval(intervalProgramId);
-        clearInterval(intervalProgramName);
-
-      };
-    }, []);
-
+  }, []);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -208,7 +244,9 @@ function Main() {
                     <h5 className="text-center header-text2">
                       Number of Projects
                     </h5>
-                    <p className="text-center normal-text">{programData.data[0][0]}</p>
+                    <p className="text-center normal-text">
+                      {programData.data[0][0]}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -219,7 +257,9 @@ function Main() {
                     <h5 className="text-center header-text2">
                       Number of Centers
                     </h5>
-                    <p className="text-center normal-text">6</p>
+                    <p className="text-center normal-text">
+                      {centerData.data[0][0]}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -230,7 +270,9 @@ function Main() {
                     <h5 className="text-center header-text">
                       Number of Locations
                     </h5>
-                    <p className="text-center normal-text">6</p>
+                    <p className="text-center normal-text">
+                      {centerData.data[0][0]}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -241,7 +283,9 @@ function Main() {
                     <h5 className="text-center header-text2">
                       Number of Courses
                     </h5>
-                    <p className="text-center normal-text">6</p>
+                    <p className="text-center normal-text">
+                      {courseData.data[0][0]}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -263,7 +307,9 @@ function Main() {
                     <h5 className="text-center header-text2">
                       Number of Trainers
                     </h5>
-                    <p className="text-center normal-text">{chartData.data[0][0]}</p>
+                    <p className="text-center normal-text">
+                      {chartData.data[0][0]}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -295,20 +341,22 @@ function Main() {
           </div>
 
           <div className="main-map" ref={thirdItemRef}>
-          <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">Project</InputLabel>
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={project}
-          label="Project"
-          onChange={handleChange}
-        >
-          {programName.data.map((name, index) => (
-            <MenuItem key={index} value={name}>{name}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Project</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={project}
+                label="Project"
+                onChange={handleChange}
+              >
+                {programName.data.map((name, index) => (
+                  <MenuItem key={index} value={name}>
+                    {name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </div>
           <div className="centered-button">
             <Link to="/dashboard">

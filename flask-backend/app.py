@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 from DashboardApi.chart_api import income_api, preTraining_api, skillImplementation_api, assessment_api
 import psycopg2
 import time
-from DashboardApi.landing_page import view_manager_api, view_trainer_api, view_trainee_api, view_program_count_api, view_program_name_api
+from DashboardApi.landing_page import view_manager_api, view_trainer_api, view_trainee_api, view_program_count_api, view_program_name_api, view_center_count_api, view_course_count_api
 from DashboardApi.project_creation import project_creation_api
 from DashboardApi.project_details import project_details_api
 
@@ -95,8 +95,8 @@ app.register_blueprint(view_program_details_api)
 app.register_blueprint(get_max_course_id_api)
 app.register_blueprint(view_all_courses_api)
 app.register_blueprint(get_center_id_by_name_api)
-
-
+app.register_blueprint(view_center_count_api)
+app.register_blueprint(view_course_count_api)
 
 
 if __name__ == "__main__":

@@ -239,7 +239,7 @@ function TextAnalysis() {
       console.log("predictions:", predictions);
 
       // Access the keyphrases from the response
-      const keyphrases = response.data.keyphrases;
+      const keyphrases = response.data.important_words;
       console.log("Keyphrases:", keyphrases);
 
       // Set the keyphrases in your state
