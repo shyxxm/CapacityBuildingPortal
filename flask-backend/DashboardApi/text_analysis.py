@@ -20,19 +20,19 @@ api_key = os.getenv('OPENAI_API_KEY')
 # Initialize the OpenAI API client
 openai.api_key = api_key
 
-# Specify the path where the model and tokenizer are saved
-model_path = 'D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/SDGFinal'
+# # Specify the path where the model and tokenizer are saved
+# model_path = 'D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/SDGFinal'
 
-# Load the tokenizer and model
-tokenizer = AutoTokenizer.from_pretrained(model_path)
-model = AutoModelForSequenceClassification.from_pretrained(model_path)
+# # # Load the tokenizer and model
+# tokenizer = AutoTokenizer.from_pretrained(model_path)
+# model = AutoModelForSequenceClassification.from_pretrained(model_path)
 
 # Load the sentiment tokenizer and model
 sentiment_tokenizer = AutoTokenizer.from_pretrained("D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/sentiment_model")
 sentiment_model = AutoModelForSequenceClassification.from_pretrained("D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/sentiment_model")
 
-# Ensure the model is in evaluation mode
-model.eval()
+# # # Ensure the model is in evaluation mode
+# model.eval()
 
 text_analysis_api = Blueprint('text_analysis_api', __name__)
 
@@ -75,28 +75,37 @@ def process_text():
 
         # Call the function to analyze text
         keyphrases = extract_keyphrases(joined)
-        sorted_sdg_scores, important_words = analyze_text(joined)
+        predictions_with_labels, important_words = analyze_text(joined)
         predicted_sentiment = predict_sentiment(joined)
-        sdg, keywords, sentiment, sdg_scores, most_likely_sdg = chatgpt(joined)
+        # sdg, keywords, sentiment, sdg_scores, most_likely_sdg = chatgpt(joined)
 
         return jsonify({
             'message': 'Text processed successfully',
             'text': joined,
-            'predictions': sorted_sdg_scores,
+            'predictions': predictions_with_labels,
             'important_words': important_words,
             'sentiment': predicted_sentiment,
             'keyphrases': list(keyphrases),
-            'chatgpt_sdg': sdg,
-            'chatgpt_keywords': keywords,
-            'chatgpt_sentiment': sentiment,
-            'chatgpt_sdg_scores': sdg_scores,
-            'chatgpt_most_likely_sdg': most_likely_sdg
+            # 'chatgpt_sdg': sdg,
+            # 'chatgpt_keywords': keywords,
+            # 'chatgpt_sentiment': sentiment,
+            # 'chatgpt_sdg_scores': sdg_scores,
+            # 'chatgpt_most_likely_sdg': most_likely_sdg
         })
     else:
         return jsonify({'error': 'Text not found in request'}), 400
 
-# Function to analyze text
 def analyze_text(joined):
+    # Replace 'shyxm/sdg_classification' with your actual model repository
+    model_name = "shyxm/sdg_classification"
+    subfolder = "SDGFinal"
+
+    # Load the tokenizer and model from the Hugging Face Hub
+    tokenizer = AutoTokenizer.from_pretrained(model_name, subfolder=subfolder)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, subfolder=subfolder)
+
+    # Ensure the model is in evaluation mode
+    model.eval()
     inputs = tokenizer(joined, return_tensors="pt", padding=True, truncation=True)
     with torch.no_grad():
         outputs = model(**inputs, output_attentions=True)
@@ -106,24 +115,31 @@ def analyze_text(joined):
         # Check for NaN values in the logits
         if torch.isnan(logits).any():
             print("Warning: NaN values detected in the logits.")
-            return None, []
+            return []
 
-        predictions = torch.softmax(logits, dim=1)[0]
+        predictions = torch.softmax(logits, dim=1).squeeze().tolist()
+
+        # Create a list of dictionaries with SDG labels and scores, adding 1 to the label
+        predictions_with_labels = [{'label': idx + 1, 'score': score} for idx, score in enumerate(predictions)]
 
         # Extract attention weights from the last layer
         last_layer_attentions = attentions[-1]
         # Take the mean attention weights across all heads
         mean_attentions = last_layer_attentions.mean(dim=1).squeeze()
 
-        # Get the token indices with the highest attention weights
-        important_tokens = mean_attentions.mean(dim=0).topk(k=10).indices
+        # Determine the number of tokens to consider
+        num_tokens = mean_attentions.size(0)
+        k = min(15, num_tokens)
 
-        # Convert token indices to words and filter out special tokens
+        # Get the token indices with the highest attention weights
+        important_tokens = mean_attentions.mean(dim=0).topk(k=k).indices
+
+        # Convert token indices to words and filter out special tokens and punctuation
         tokens = tokenizer.convert_ids_to_tokens(inputs['input_ids'][0])
         important_words = []
         for idx in important_tokens:
             token = tokens[idx]
-            if token in tokenizer.all_special_tokens or not token.isalnum():
+            if token in tokenizer.all_special_tokens or token in string.punctuation:
                 continue
             if token.startswith("##"):
                 original_word_part = token[2:]
@@ -135,17 +151,12 @@ def analyze_text(joined):
                 important_words.append(token)
 
         # Remove duplicates while preserving order
-        final_words = []
-        seen_words = set()
-        for word in important_words:
-            if word not in seen_words:
-                final_words.append(word)
-                seen_words.add(word)
+        seen = set()
+        important_words = [x for x in important_words if not (x in seen or seen.add(x))]
+        print(f"Keywords: {predictions_with_labels}")
 
-        # Limit to the first 15 most important words
-        final_words = final_words[:15]
+    return predictions_with_labels, important_words
 
-    return predictions, final_words
 
 # Define the function to predict sentiment
 def predict_sentiment(joined):

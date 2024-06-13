@@ -245,17 +245,8 @@ function TextAnalysis() {
       // Set the keyphrases in your state
       setKeyphrases(keyphrases);
 
-      // Extract labels and data from predictions
-      const labels = Object.keys(predictions);
-      const data = Object.values(predictions);
-
       // Sort predictions by score in descending order
-      const sortedPredictions = labels
-        .map((label, index) => ({
-          label,
-          score: data[index],
-        }))
-        .sort((a, b) => b.score - a.score);
+      const sortedPredictions = predictions.sort((a, b) => b.score - a.score);
 
       console.log("Sorted Predictions:", sortedPredictions);
 
@@ -270,7 +261,9 @@ function TextAnalysis() {
 
       // Update chartData state with new sorted labels and data
       setChartData({
-        labels: sortedPredictions.map((prediction) => prediction.label),
+        labels: sortedPredictions.map(
+          (prediction) => `SDG ${prediction.label}`
+        ),
         datasets: [
           {
             label: "SDG Predictions",
@@ -661,7 +654,7 @@ function TextAnalysis() {
                                         <div className="image-parent">
                                           <img
                                             className="tech-icon"
-                                            src={require(`../../public/assets/images/sdgs/${tech}`)}
+                                            src={require(`../images/sdgs/${tech}`)}
                                             alt={tech}
                                           />
                                         </div>
@@ -677,7 +670,7 @@ function TextAnalysis() {
                                         className="tech-shown"
                                         src={
                                           selectedImage
-                                            ? require(`../../public/assets/images/sdgs/${selectedImage}.png`)
+                                            ? require(`../images/sdgs/SDG ${selectedImage}.png`)
                                             : ""
                                         }
                                         alt="Selected Image"
