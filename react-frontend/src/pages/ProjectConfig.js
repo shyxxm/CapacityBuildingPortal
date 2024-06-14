@@ -34,7 +34,6 @@ const steps = [
   "Select an existing project",
   "Location for centers",
   "Course configuration",
-  "Step 4 Placeholder",
 ];
 
 const ITEM_HEIGHT = 48;

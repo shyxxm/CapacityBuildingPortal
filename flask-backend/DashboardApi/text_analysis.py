@@ -11,14 +11,14 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, Auto
 import numpy as np
 import string
 
-# Load environment variables from .env file
-load_dotenv()
+# # Load environment variables from .env file
+# load_dotenv()
 
-# Retrieve the OpenAI API key from environment variables
-api_key = os.getenv('OPENAI_API_KEY')
+# # Retrieve the OpenAI API key from environment variables
+# api_key = os.getenv('OPENAI_API_KEY')
 
-# Initialize the OpenAI API client
-openai.api_key = api_key
+# # Initialize the OpenAI API client
+# openai.api_key = api_key
 
 # # Specify the path where the model and tokenizer are saved
 # model_path = 'D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/SDGFinal'
@@ -27,9 +27,9 @@ openai.api_key = api_key
 # tokenizer = AutoTokenizer.from_pretrained(model_path)
 # model = AutoModelForSequenceClassification.from_pretrained(model_path)
 
-# Load the sentiment tokenizer and model
-sentiment_tokenizer = AutoTokenizer.from_pretrained("D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/sentiment_model")
-sentiment_model = AutoModelForSequenceClassification.from_pretrained("D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/sentiment_model")
+# # Load the sentiment tokenizer and model
+# sentiment_tokenizer = AutoTokenizer.from_pretrained("D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/sentiment_model")
+# sentiment_model = AutoModelForSequenceClassification.from_pretrained("D:/AmritaUniversity/AmmachiLabs/CapacityBuildingPortal/flask-backend/DashboardApi/text_analysis/sentiment_model")
 
 # # # Ensure the model is in evaluation mode
 # model.eval()
@@ -74,7 +74,7 @@ def process_text():
         joined = re.sub(r'"', "", joined)
 
         # Call the function to analyze text
-        keyphrases = extract_keyphrases(joined)
+        # keyphrases = extract_keyphrases(joined)
         predictions_with_labels, important_words = analyze_text(joined)
         predicted_sentiment = predict_sentiment(joined)
         # sdg, keywords, sentiment, sdg_scores, most_likely_sdg = chatgpt(joined)
@@ -85,7 +85,7 @@ def process_text():
             'predictions': predictions_with_labels,
             'important_words': important_words,
             'sentiment': predicted_sentiment,
-            'keyphrases': list(keyphrases),
+            # 'keyphrases': list(keyphrases),
             # 'chatgpt_sdg': sdg,
             # 'chatgpt_keywords': keywords,
             # 'chatgpt_sentiment': sentiment,
@@ -160,20 +160,19 @@ def analyze_text(joined):
 
 # Define the function to predict sentiment
 def predict_sentiment(joined):
-    inputs = sentiment_tokenizer(joined, return_tensors="pt", truncation=True, padding=True)
-    outputs = sentiment_model(**inputs)
-    logits = outputs.logits
-    predicted_class_id = logits.argmax().item()
-    predicted_sentiment = "positive" if predicted_class_id == 1 else "negative"
+    sentiment_analysis = pipeline("sentiment-analysis", model="siebert/sentiment-roberta-large-english")
+    result = sentiment_analysis(joined)
+    # Assuming 'POSITIVE' label is for positive sentiment and 'NEGATIVE' label is for negative sentiment
+    predicted_sentiment = "positive" if result[0]['label'] == 'POSITIVE' else "negative"
     return predicted_sentiment
 
-def extract_keyphrases(text, model_name="ml6team/keyphrase-extraction-kbir-kpcrowd"):
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForTokenClassification.from_pretrained(model_name)
-    nlp_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
-    results = nlp_pipeline(text)
-    keyphrases = np.unique([result['word'].strip() for result in results])
-    return keyphrases
+# def extract_keyphrases(text, model_name="ml6team/keyphrase-extraction-kbir-kpcrowd"):
+#     tokenizer = AutoTokenizer.from_pretrained(model_name)
+#     model = AutoModelForTokenClassification.from_pretrained(model_name)
+#     nlp_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+#     results = nlp_pipeline(text)
+#     keyphrases = np.unique([result['word'].strip() for result in results])
+#     return keyphrases
 
 def chatgpt(joined):
     """
