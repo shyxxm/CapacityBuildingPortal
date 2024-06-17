@@ -50,7 +50,7 @@ function Nav() {
                       <span className="hide-menu">Dashboard</span>
                     </a>
                   </Link>
-                </li>{" "}
+                </li>
                 <li className="nav-small-cap">
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">Project Management</span>
@@ -79,13 +79,13 @@ function Nav() {
                   <Link to="/ProjectConfig">
                     <a className="sidebar-link" aria-expanded="false">
                       <span>
-                        <i className="ti ti-fidget-spinner" />
+                        <i className="ti ti-circles" />
                       </span>
                       <span className="hide-menu">Project Configuration</span>
                     </a>
                   </Link>
                 </li>
-                <li className="sidebar-item">
+                {/* <li className="sidebar-item">
                   <Link to="/CenterConfig">
                     <a className="sidebar-link" aria-expanded="false">
                       <span>
@@ -94,7 +94,7 @@ function Nav() {
                       <span className="hide-menu">Center Configuration</span>
                     </a>
                   </Link>
-                </li>
+                </li> */}
                 <li className="nav-small-cap">
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">Project Reports</span>
@@ -126,7 +126,7 @@ function Nav() {
                   <Link to="/TextAnalysis">
                     <a className="sidebar-link" aria-expanded="false">
                       <span>
-                        <i className="ti ti-picture-in-picture-on" />
+                        <i className="ti ti-device-analytics" />
                       </span>
                       <span className="hide-menu">Text Analysis</span>
                     </a>
@@ -153,19 +153,29 @@ function Nav() {
                   <Link to="/AddTrainer">
                     <a className="sidebar-link" aria-expanded="false">
                       <span>
-                        <i className="ti ti-picture-in-picture-on" />
+                        <i className="ti ti-user-check" />
                       </span>
                       <span className="hide-menu">Add Trainers</span>
                     </a>
                   </Link>
                 </li>
-                <li className="sidebar-item">
+                {/* <li className="sidebar-item">
                   <Link to="/AddCenter">
                     <a className="sidebar-link" aria-expanded="false">
                       <span>
                         <i className="ti ti-picture-in-picture-on" />
                       </span>
                       <span className="hide-menu">Add Centers</span>
+                    </a>
+                  </Link>
+                </li> */}
+                <li className="sidebar-item">
+                  <Link to="/AddTrainee">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i className="ti ti-picture-in-picture-on" />
+                      </span>
+                      <span className="hide-menu">Add Trainees</span>
                     </a>
                   </Link>
                 </li>
@@ -274,7 +284,7 @@ function Nav() {
                     </a>
                   </Link>
                 </li> */}
-                <li className="nav-small-cap">
+                {/* <li className="nav-small-cap">
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">EXTRA</span>
                 </li>
@@ -307,7 +317,7 @@ function Nav() {
                       <span className="hide-menu">New Sample Page</span>
                     </a>
                   </Link>
-                </li>
+                </li> */}
               </ul>
               {/* <div className="unlimited-access hide-menu bg-light-primary position-relative mb-7 mt-5 rounded">
                 <div className="d-flex">

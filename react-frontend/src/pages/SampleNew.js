@@ -1,7 +1,6 @@
-import React, { useEffect, Fragment, useRef } from "react";
+import React, { useEffect, useRef, useState, Fragment } from "react";
 import Header from "../components/Header";
 import Nav from "../components/NavBar";
-
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
@@ -15,6 +14,7 @@ import {
   GridToolbarContainer,
   GridActionsCellItem,
   GridRowEditStopReasons,
+  useGridApiRef,
 } from "@mui/x-data-grid";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -62,10 +62,10 @@ function EditToolbar(props) {
 }
 
 function CourseGrid() {
-  const [rows, setRows] = React.useState(initialRows);
-  const [rowModesModel, setRowModesModel] = React.useState({});
-  const [centers, setCenters] = React.useState([]);
-  const dataGridRef = useRef(null);
+  const [rows, setRows] = useState(initialRows);
+  const [rowModesModel, setRowModesModel] = useState({});
+  const [centers, setCenters] = useState([]);
+  const apiRef = useGridApiRef();
 
   useEffect(() => {
     const fetchProgramDetails = async () => {
@@ -135,43 +135,60 @@ function CourseGrid() {
   };
 
   const handleEditClick = (id) => () => {
+    console.log("Edit Clicked:", id);
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
   const handleSaveClick = (id) => async () => {
-    if (!dataGridRef.current) {
-      console.error("DataGrid reference is not available.");
+    console.log("Save Clicked:", id);
+    const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+    if (!isInEditMode) {
+      console.error("The cell is not in edit mode.");
       return;
     }
-    const apiRef = dataGridRef.current.apiRef.current;
-    if (!apiRef) {
-      console.error("apiRef is not available.");
-      return;
-    }
-    apiRef.stopCellEditMode({ id });
 
-    const rowToSave = rows.find((row) => row.id === id);
-    console.log("Data to be saved:", rowToSave);
-    if (validateRow(rowToSave)) {
+    // Commit the changes for all editable cells
+    const row = apiRef.current.getRow(id);
+    const updatedRow = {
+      ...row,
+      course_name: row.course_name || "",
+      course_capacity: row.course_capacity || 0,
+      course_duration: row.course_duration || 0,
+      course_aim: row.course_aim || "",
+      course_start_date: row.course_start_date || dayjs().toISOString(),
+      course_end_date:
+        row.course_end_date || dayjs().add(1, "month").toISOString(),
+      center_id: row.center_id || "",
+    };
+
+    // Update the state with the updated row
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === id ? updatedRow : row))
+    );
+
+    if (validateRow(updatedRow)) {
       try {
-        const updatedRow = await processRowUpdate(rowToSave);
+        const savedRow = await processRowUpdate(updatedRow);
         setRowModesModel({
           ...rowModesModel,
           [id]: { mode: GridRowModes.View },
         });
         setRows((prevRows) =>
-          prevRows.map((row) => (row.id === id ? updatedRow : row))
+          prevRows.map((row) => (row.id === id ? savedRow : row))
         );
       } catch (error) {
         console.error("Error saving course:", error);
       }
     } else {
-      console.error("Invalid data:", rowToSave);
+      console.error("Invalid data:", updatedRow);
       alert("Please fill in all required fields before saving.");
     }
+
+    apiRef.current.stopRowEditMode({ id });
   };
 
   const handleDeleteClick = (id) => async () => {
+    console.log("Delete Clicked:", id);
     try {
       await deleteCourse(id);
       setRows((oldRows) => oldRows.filter((row) => row.id !== id));
@@ -181,6 +198,7 @@ function CourseGrid() {
   };
 
   const handleCancelClick = (id) => () => {
+    console.log("Cancel Clicked:", id);
     setRowModesModel({
       ...rowModesModel,
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
@@ -509,7 +527,7 @@ function CourseGrid() {
                         }}
                       >
                         <DataGrid
-                          ref={dataGridRef}
+                          apiRef={apiRef}
                           rows={rows}
                           columns={columns}
                           editMode="row"

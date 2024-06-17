@@ -1,0 +1,272 @@
+import React, { Fragment, useState } from "react";
+import Header from "../components/Header";
+import Nav from "../components/NavBar";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import axios from "axios";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import Papa from "papaparse";
+
+function AddTrainee() {
+  const [traineeData, setTraineeData] = useState([]);
+  const [trainee_name, setTraineeName] = useState("");
+  const [join_date, setJoinDate] = React.useState(dayjs());
+  const [end_date, setEndDate] = React.useState(dayjs());
+  const [open, setOpen] = React.useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    Papa.parse(file, {
+      header: true,
+      transform: (value, header) => {
+        if (header === "join_date") {
+          return value.replace(/['"]+/g, "");
+        }
+        return value;
+      },
+      complete: (results) => {
+        console.log(results.data);
+        setTraineeData(results.data);
+      },
+    });
+  };
+
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setOpen(false);
+  };
+
+  const validateFields = () => {
+    if (!trainee_name || !join_date) {
+      setError("All fields are required");
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
+  const handleMultiSubmit = (event) => {
+    event.preventDefault();
+
+    // Validate CSV data
+    if (
+      traineeData.some((trainee) => !trainee.trainee_name || !trainee.join_date)
+    ) {
+      setError("All fields in the CSV file are required");
+      return;
+    }
+
+    traineeData.forEach((trainer) => {
+      const { trainee_name, join_date } = trainee;
+      axios
+        .post("/add_trainee", { trainee_name, join_date })
+        .then((response) => {
+          console.log("Trainers created successfully:", response.data);
+        })
+        .catch((error) => {
+          console.error("Error creating Trainee:", error);
+        });
+    });
+    handleClick();
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 3000);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    // Validate fields
+    if (!validateFields()) return;
+
+    axios
+      .post("/add_trainee", { trainee_name, join_date })
+      .then((response) => {
+        handleClick();
+        console.log("Trainee created successfully:", response.data);
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 3000);
+      })
+      .catch((error) => {
+        console.log(trainee_name, join_date);
+        console.error("Error creating trainee:", error);
+      });
+  };
+
+  return (
+    <Fragment>
+      <div
+        className="page-wrapper"
+        id="main-wrapper"
+        data-layout="vertical"
+        data-navbarbg="skin6"
+        data-sidebartype="full"
+        data-sidebar-position="fixed"
+        data-header-position="fixed"
+      >
+        <Nav></Nav>
+        <div className="body-wrapper">
+          <Header></Header>
+          <div className="container-fluid">
+            <div className="container-fluid">
+              <div className="card">
+                <div className="card-body">
+                  <h5 className="card-title fw-semibold mb-4">Add Trainees</h5>
+                  <div className="card">
+                    <div
+                      className="card-body p-4"
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Box
+                        component="form"
+                        onSubmit={handleSubmit}
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          "& > :not(style)": { m: 1, width: "100%" },
+                        }}
+                        noValidate
+                        autoComplete="off"
+                        style={{ maxWidth: "400px" }}
+                      >
+                        <TextField
+                          id="trainer-name"
+                          label="Trainer Name"
+                          variant="outlined"
+                          value={trainer_name}
+                          onChange={(event) =>
+                            setTraineeName(event.target.value)
+                          }
+                          sx={{ width: "300px" }}
+                        />
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DemoContainer components={["DatePicker"]}>
+                            <DatePicker
+                              label="Trainer Start Date"
+                              value={join_date}
+                              onChange={(newValue) => setJoinDate(newValue)}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  sx={{ width: "300px" }}
+                                />
+                              )}
+                            />
+                          </DemoContainer>
+                        </LocalizationProvider>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DemoContainer components={["DatePicker"]}>
+                            <DatePicker
+                              label="Trainer End Date"
+                              value={end_date}
+                              onChange={(newValue) => setEndDate(newValue)}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  sx={{ width: "300px" }}
+                                />
+                              )}
+                            />
+                          </DemoContainer>
+                        </LocalizationProvider>
+                        {error && (
+                          <Alert severity="error" sx={{ width: "100%" }}>
+                            {error}
+                          </Alert>
+                        )}
+                        <button
+                          type="submit"
+                          className="btn btn-danger w-100 py-8 fs-4 rounded-2"
+                          style={{ width: "300px" }}
+                        >
+                          Create Trainer
+                        </button>
+                      </Box>
+                      <Snackbar
+                        open={open}
+                        autoHideDuration={6000}
+                        onClose={handleClose}
+                      >
+                        <Alert
+                          onClose={handleClose}
+                          severity="success"
+                          variant="filled"
+                          sx={{ width: "100%" }}
+                        >
+                          Trainer created successfully
+                        </Alert>
+                      </Snackbar>
+                      <h5 className="card-title fw-semibold mb-4 text-center mt-4">
+                        or
+                      </h5>
+                      <div
+                        className="card mb-0"
+                        style={{ width: "100%", maxWidth: "400px" }}
+                      >
+                        <div
+                          className="card-body p-4"
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                          }}
+                        >
+                          <label
+                            className="btn btn-info w-100 py-8 fs-4 rounded-2"
+                            style={{ width: "300px" }}
+                          >
+                            <input
+                              type="file"
+                              accept=".csv"
+                              onChange={handleFileUpload}
+                              style={{ display: "none" }}
+                            />
+                            Upload CSV
+                          </label>
+                          <br />
+                          {trainerData.length ? (
+                            <button
+                              className="btn btn-danger w-100 py-8 fs-4 rounded-2"
+                              style={{ width: "300px" }}
+                              onClick={handleMultiSubmit}
+                            >
+                              Create {trainerData.length} trainers
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Fragment>
+  );
+}
+
+export default AddTrainee;

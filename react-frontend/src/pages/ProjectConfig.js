@@ -23,6 +23,7 @@ import {
   GridToolbarContainer,
   GridActionsCellItem,
   GridRowEditStopReasons,
+  useGridApiRef,
 } from "@mui/x-data-grid";
 
 import { LocalizationProvider } from "@mui/x-date-pickers-pro";
@@ -628,6 +629,7 @@ function CourseGrid({ selectedProgramId }) {
   const [rowModesModel, setRowModesModel] = useState({});
   const [centers, setCenters] = useState([]);
   const dataGridRef = useRef(null);
+  const apiRef = useGridApiRef();
 
   useEffect(() => {
     const fetchProgramDetails = async () => {
@@ -702,27 +704,23 @@ function CourseGrid({ selectedProgramId }) {
     setRows((prevRows) =>
       prevRows.map((row) => (row.id === id ? { ...row, [field]: value } : row))
     );
-    console.log(
-      "Edited row:",
-      rows.find((row) => row.id === id)
-    );
   };
 
   const handleEditClick = (id) => () => {
+    console.log("Edit Clicked:", id);
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
   const handleSaveClick = (id) => async () => {
-    if (!dataGridRef.current) {
-      console.error("DataGrid reference is not available.");
+    console.log("Save Clicked:", id);
+    const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+    if (!isInEditMode) {
+      console.error("The cell is not in edit mode.");
       return;
     }
-    const apiRef = dataGridRef.current.apiRef.current;
-    if (!apiRef) {
-      console.error("apiRef is not available.");
-      return;
-    }
-    apiRef.stopCellEditMode({ id });
+
+    // Commit the changes and stop the edit mode
+    apiRef.current.stopRowEditMode({ id });
 
     const rowToSave = rows.find((row) => row.id === id);
     console.log("Data to be saved:", rowToSave);
@@ -781,17 +779,16 @@ function CourseGrid({ selectedProgramId }) {
 
   const processRowUpdate = async (newRow) => {
     let updatedRow = { ...newRow, isNew: false };
+
+    // Ensure all required fields have default values
+    if (!updatedRow.course_name) updatedRow.course_name = "New Course";
+    if (!updatedRow.course_capacity) updatedRow.course_capacity = 1;
+    if (!updatedRow.course_duration) updatedRow.course_duration = 1;
+    if (!updatedRow.center_id) updatedRow.center_id = centers[0]?.value || "";
+
     console.log("Row update:", updatedRow);
 
     try {
-      // Ensure center_id is updated correctly
-      if (newRow.center_name && !newRow.center_id) {
-        const centerId = await getCenterIdByName(newRow.center_name);
-        if (centerId) {
-          updatedRow.center_id = centerId;
-        }
-      }
-
       const response = await fetch(
         newRow.isNew ? "/add_course" : "/edit_course",
         {
@@ -912,9 +909,10 @@ function CourseGrid({ selectedProgramId }) {
   const validateRow = (row) => {
     console.log("Validating row:", row);
     return (
-      row.course_name !== "" &&
+      row.course_name.trim() !== "" &&
       row.course_capacity > 0 &&
-      row.course_duration > 0
+      row.course_duration > 0 &&
+      row.center_id !== ""
     );
   };
 
@@ -1096,7 +1094,7 @@ function CourseGrid({ selectedProgramId }) {
           }}
         >
           <DataGrid
-            ref={dataGridRef}
+            apiRef={apiRef}
             rows={rows}
             columns={columns}
             editMode="row"

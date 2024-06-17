@@ -20,6 +20,7 @@ function AddTrainer() {
   const [start_date, setStartDate] = React.useState(dayjs());
   const [end_date, setEndDate] = React.useState(dayjs());
   const [open, setOpen] = React.useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleFileUpload = (e) => {
@@ -50,8 +51,29 @@ function AddTrainer() {
     setOpen(false);
   };
 
+  const validateFields = () => {
+    if (!trainer_name || !start_date || !end_date) {
+      setError("All fields are required");
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
   const handleMultiSubmit = (event) => {
     event.preventDefault();
+
+    // Validate CSV data
+    if (
+      trainerData.some(
+        (trainer) =>
+          !trainer.trainer_name || !trainer.start_date || !trainer.end_date
+      )
+    ) {
+      setError("All fields in the CSV file are required");
+      return;
+    }
+
     trainerData.forEach((trainer) => {
       const { trainer_name, start_date, end_date } = trainer;
       axios
@@ -71,6 +93,10 @@ function AddTrainer() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    // Validate fields
+    if (!validateFields()) return;
+
     axios
       .post("/add_trainer", { trainer_name, start_date, end_date })
       .then((response) => {
@@ -168,6 +194,11 @@ function AddTrainer() {
                             />
                           </DemoContainer>
                         </LocalizationProvider>
+                        {error && (
+                          <Alert severity="error" sx={{ width: "100%" }}>
+                            {error}
+                          </Alert>
+                        )}
                         <button
                           type="submit"
                           className="btn btn-danger w-100 py-8 fs-4 rounded-2"
