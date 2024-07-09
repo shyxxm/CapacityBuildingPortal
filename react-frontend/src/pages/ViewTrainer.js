@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useEffect } from "react";
+import axios from "../services/axiosConfig"; // Use the configured Axios instance
 import Header from "../components/Header";
 import Nav from "../components/NavBar";
 import { DataGrid } from "@mui/x-data-grid";
@@ -116,24 +117,22 @@ function ViewTrainer() {
 
   // function to fetch data
   const fetchData = () => {
-    fetch("/view_trainers_sort")
+    axios
+      .get("/view_trainers_sort")
       .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
-      .then((response) => {
-        const data = response.data; // Extract the data array from the response
+        const data = res.data; // Extract the data array from the response
         console.log("Received data:", data);
         // Transform the data into an array of objects with unique IDs
         const transformedData = data.map((item, index) => ({
           id: index + 1, // Use index + 1 as the unique ID (assuming index starts from 0)
-          trainer_id: item[0],
-          trainer_name: item[1],
-          trainer_start_date: new Date(item[2]).toISOString().split("T")[0],
-          trainer_end_date: new Date(item[3]).toISOString().split("T")[0],
+          trainer_id: item.trainer_id,
+          trainer_name: item.trainer_name,
+          trainer_start_date: new Date(item.trainer_start_date)
+            .toISOString()
+            .split("T")[0],
+          trainer_end_date: new Date(item.trainer_end_date)
+            .toISOString()
+            .split("T")[0],
         }));
         setChartData(transformedData);
       })
@@ -163,17 +162,13 @@ function ViewTrainer() {
 
     // Call the delete API for each selected row
     selectedRows.forEach((id) => {
-      fetch(`/delete_trainer`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ trainer_id: id }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.error) {
-            console.error("Error deleting trainer:", data.error);
+      axios
+        .delete(`/delete_trainer`, {
+          data: { trainer_id: id },
+        })
+        .then((response) => {
+          if (response.data.error) {
+            console.error("Error deleting trainer:", response.data.error);
           } else {
             console.log("Trainer deleted successfully:", id);
           }
@@ -207,17 +202,11 @@ function ViewTrainer() {
     console.log("Saving edited trainer:", formData);
 
     // Call the backend API to update the trainer
-    fetch(`/edit_trainer`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          console.error("Error updating trainer:", data.error);
+    axios
+      .put(`/edit_trainer`, formData)
+      .then((response) => {
+        if (response.data.error) {
+          console.error("Error updating trainer:", response.data.error);
         } else {
           console.log("Trainer updated successfully:", formData.id);
           // Update the frontend state to reflect the changes

@@ -5,6 +5,7 @@ import time
 from DashboardApi.landing_page import view_manager_api, view_trainer_api, view_trainee_api, view_program_count_api, view_program_name_api, view_center_count_api, view_course_count_api
 from DashboardApi.project_creation import project_creation_api
 from DashboardApi.project_details import project_details_api
+from flask_cors import CORS
 
 from DashboardApi.add_manager import add_manager_api
 from DashboardApi.add_trainer import add_trainer_api
@@ -27,6 +28,7 @@ from DashboardApi.project_config import view_centers_api, add_center_api, get_pr
 from db import cnx
 
 app = Flask(__name__)
+CORS(app)
 cnx = None  # Define cnx as a global variable
 
 # Sample Members API

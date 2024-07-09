@@ -16203,7 +16203,7 @@ font-family: 'Trebuchet MS';
   
   .image-shown {
     left: 48%;
-    top: 16%;
+    top: 20%;
     width: 100px; /* Set the width */
     opacity: 0; /* Start with opacity 0 */
     transition: opacity 1.5s ease-in; /* Apply transition on opacity */    

@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useContext, useEffect } from "react";
-import axios from "axios";
+import axios from "../services/axiosConfig"; // Use the configured Axios instance
 import { useNavigate } from "react-router-dom";
 import UserContext from "../services/UserContext";
 
