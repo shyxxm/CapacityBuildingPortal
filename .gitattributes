@@ -1,3 +1,15 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 *.safetensors filter=lfs diff=lfs merge=lfs -text
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Windows line endings for batch files
+*.bat eol=crlf
+
+# Linux line endings for shell scripts
+*.sh eol=lf
+
+# Prevent changes in the virtual environment files
+env/* -text

@@ -35,6 +35,7 @@ cnx = None  # Define cnx as a global variable
 # Sample Members API
 @app.route("/members")
 def members():
+    print("hello")
     return {"members": ["Member1", "Member2", "Member3", "Member4"]}
 
 @app.route("/tables")
