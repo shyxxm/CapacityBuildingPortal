@@ -349,7 +349,7 @@ function ProjectConfig() {
     {
       field: "id",
       headerName: "Center ID",
-      width: 150,
+      width: 200,
       editable: false,
       headerAlign: "center",
       align: "center",
@@ -357,7 +357,7 @@ function ProjectConfig() {
     {
       field: "center_name",
       headerName: "Center Name",
-      width: 200,
+      width: 400,
       editable: true,
       headerAlign: "center",
       align: "center",
@@ -365,7 +365,7 @@ function ProjectConfig() {
     {
       field: "center_location",
       headerName: "Center Location",
-      width: 200,
+      width: 300,
       editable: true,
       headerAlign: "center",
       align: "center",
@@ -373,7 +373,7 @@ function ProjectConfig() {
     {
       field: "center_latitude",
       headerName: "Center Latitude",
-      width: 200,
+      width: 300,
       editable: true,
       headerAlign: "center",
       align: "center",
@@ -381,7 +381,7 @@ function ProjectConfig() {
     {
       field: "center_longitude",
       headerName: "Center Longitude",
-      width: 200,
+      width: 300,
       editable: true,
       headerAlign: "center",
       align: "center",
@@ -390,7 +390,7 @@ function ProjectConfig() {
       field: "actions",
       type: "actions",
       headerName: "Actions",
-      width: 150,
+      width: 200,
       headerAlign: "center",
       align: "center",
       cellClassName: "actions",
@@ -922,29 +922,34 @@ function CourseGrid({ selectedProgramId }) {
       headerName: "Course ID",
       width: 100,
       editable: false,
+      headerAlign: "center",
+      align: "center",
     },
     {
       field: "course_name",
       headerName: "Course Name",
-      width: 180,
+      width: 250,
       editable: true,
+      headerAlign: "center",
+      align: "center",
     },
     {
       field: "course_capacity",
       headerName: "Course Capacity",
       type: "number",
       width: 150,
-      align: "left",
-      headerAlign: "left",
+
       editable: true,
+      headerAlign: "center",
+      align: "center",
     },
     {
       field: "course_duration",
       headerName: "Course Duration",
       type: "number",
       width: 150,
-      align: "left",
-      headerAlign: "left",
+      headerAlign: "center",
+      align: "center",
       editable: true,
     },
     {
@@ -952,8 +957,12 @@ function CourseGrid({ selectedProgramId }) {
       headerName: "Course Aim",
       width: 300,
       editable: true,
+      headerAlign: "center",
+      align: "center",
     },
     {
+      headerAlign: "center",
+      align: "center",
       field: "course_start_date",
       headerName: "Course Start Date",
       width: 180,
@@ -976,6 +985,8 @@ function CourseGrid({ selectedProgramId }) {
       ),
     },
     {
+      headerAlign: "center",
+      align: "center",
       field: "course_end_date",
       headerName: "Course End Date",
       width: 180,
@@ -998,6 +1009,8 @@ function CourseGrid({ selectedProgramId }) {
       ),
     },
     {
+      headerAlign: "center",
+      align: "center",
       field: "center_id",
       headerName: "Center",
       width: 220,
@@ -1030,7 +1043,10 @@ function CourseGrid({ selectedProgramId }) {
         );
       },
     },
+
     {
+      headerAlign: "center",
+      align: "center",
       field: "actions",
       type: "actions",
       headerName: "Actions",

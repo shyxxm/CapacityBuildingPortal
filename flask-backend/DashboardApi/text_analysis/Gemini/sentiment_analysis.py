@@ -1,7 +1,7 @@
 import google.generativeai as genai
 
 # Replace with your actual API key (obtain from Google AI Studio)
-API_KEY = "AIzaSyAIBrIs9VTOikEvJel5ZKElU6zDGnro6Jc"
+API_KEY = "AIzaSyBtqE6_DzKqiXsuzvpWE1SSmoFwO24j5_4"
 
 def analyze_sentiment(text):
     """

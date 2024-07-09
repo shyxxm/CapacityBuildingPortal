@@ -14,13 +14,14 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import axios from "axios";
 import TextField from "@mui/material/TextField";
-import { Line } from "react-chartjs-2";
+import { Line, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -38,6 +39,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend
@@ -59,7 +61,18 @@ function TextAnalysis() {
       },
     ],
   });
-
+  const [barChartData, setBarChartData] = useState({
+    labels: [], // Initialize with empty array
+    datasets: [
+      {
+        label: "Important Words",
+        data: [], // Initialize with empty array
+        backgroundColor: [],
+        borderColor: [],
+        borderWidth: 1,
+      },
+    ],
+  });
   const [pointStyle, setPointStyle] = useState("crossRot");
 
   useEffect(() => {
@@ -108,6 +121,7 @@ function TextAnalysis() {
   const [activeStep, setActiveStep] = React.useState(0);
 
   const [showImage, setShowImage] = useState(false);
+  const [showRow, setShowRow] = useState(false);
   const [showgraph, setShowgraph] = useState(false);
   const [stopSpinning, setStopSpinning] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
@@ -214,6 +228,21 @@ function TextAnalysis() {
     }
   };
 
+  const generateColors = (numColors) => {
+    const colors = [];
+    for (let i = 0; i < numColors; i++) {
+      const r = Math.floor(Math.random() * 255);
+      const g = Math.floor(Math.random() * 255);
+      const b = Math.floor(Math.random() * 255);
+      colors.push(`rgba(${r}, ${g}, ${b}, 0.2)`);
+    }
+    return colors;
+  };
+
+  const generateBorderColors = (colors) => {
+    return colors.map((color) => color.replace("0.2", "1"));
+  };
+
   const handleStep2Next = async (event) => {
     event.preventDefault();
 
@@ -227,7 +256,7 @@ function TextAnalysis() {
       const processedText = response.data.text;
       console.log("Processed text:", processedText);
 
-      // Access the processed text from the response
+      // Access the predicted sentiment from the response
       const predicted_sentiment = response.data.sentiment;
       console.log("Predicted sentiment:", predicted_sentiment);
 
@@ -239,11 +268,17 @@ function TextAnalysis() {
       console.log("predictions:", predictions);
 
       // Access the keyphrases from the response
-      const keyphrases = response.data.important_words;
-      console.log("Keyphrases:", keyphrases);
+      const importantWords = response.data.important_words.map(
+        (item) => item.word
+      );
+      const importantWeights = response.data.important_words.map(
+        (item) => item.weight
+      );
+      console.log("Important Words:", importantWords);
+      console.log("Important Weights:", importantWeights);
 
       // Set the keyphrases in your state
-      setKeyphrases(keyphrases);
+      setKeyphrases(importantWords);
 
       // Sort predictions by score in descending order
       const sortedPredictions = predictions.sort((a, b) => b.score - a.score);
@@ -257,6 +292,7 @@ function TextAnalysis() {
 
       setShowgraph(true);
       setShowImage(true);
+      setShowRow(true);
       setStopSpinning(true);
 
       // Update chartData state with new sorted labels and data
@@ -276,6 +312,24 @@ function TextAnalysis() {
           },
         ],
       });
+
+      // Generate colors based on the number of important words
+      const colors = generateColors(importantWords.length);
+
+      // Set chart data for important words bar chart
+      const barChartData = {
+        labels: importantWords.slice(0, 10), // Limit to 10 words
+        datasets: [
+          {
+            label: "Important Words",
+            data: importantWeights.slice(0, 10), // Limit to 10 weights
+            backgroundColor: colors,
+            borderColor: generateBorderColors(colors),
+            borderWidth: 1,
+          },
+        ],
+      };
+      setBarChartData(barChartData);
     } catch (error) {
       console.error("Error processing text:", error);
       // Handle error if needed
@@ -285,24 +339,6 @@ function TextAnalysis() {
   const handleReset = () => {
     setActiveStep(0);
   };
-
-  // useEffect(() => {
-  //   // Set showImage to true after a delay to trigger the animation
-  //   const timeout = setTimeout(() => {
-  //     setShowgraph(true);
-  //     setShowImage(true);
-  //   }, 15000); // 20 seconds delay
-
-  //   // Stop spinning after 20 seconds
-  //   const stopTimeout = setTimeout(() => {
-  //     setStopSpinning(true);
-  //   }, 15000); // 20 seconds delay
-
-  //   return () => {
-  //     clearTimeout(timeout);
-  //     clearTimeout(stopTimeout);
-  //   };
-  // }, []);
 
   const ferrisOfTechs = [
     "SDG 1.png",
@@ -676,21 +712,73 @@ function TextAnalysis() {
                                         alt="Selected Image"
                                       />
                                     </div>
-
-                                    <div className="chart-container-output">
-                                      <div
-                                        className={`chart-line-output ${
-                                          showgraph ? "show" : ""
-                                        }`}
-                                        style={{ height: "600px" }}
-                                      >
-                                        <Line
-                                          ref={chartRef}
-                                          data={chartData}
-                                          options={config}
-                                        />
+                                    <div
+                                      className={`chart-line-output row ${
+                                        showRow ? "show" : ""
+                                      }`}
+                                    >
+                                      <div className="col-lg-6 d-flex align-items-strech">
+                                        <div className="card w-100">
+                                          <div className="card-body">
+                                            <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                                              <div className="mb-3 mb-sm-0">
+                                                <h5 className="card-title fw-semibold">
+                                                  SDG Confidence Score
+                                                </h5>
+                                              </div>
+                                            </div>
+                                            <div
+                                              className={`chart-line-output ${
+                                                showgraph ? "show" : ""
+                                              }`}
+                                              style={{ height: "400px" }}
+                                            >
+                                              <Line
+                                                ref={chartRef}
+                                                data={chartData}
+                                                options={config}
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="col-lg-6 d-flex align-items-strech">
+                                        <div className="card w-100">
+                                          <div className="card-body">
+                                            <div className="d-sm-flex d-block align-items-center justify-content-between mb-9">
+                                              <div className="mb-3 mb-sm-0">
+                                                <h5 className="card-title fw-semibold">
+                                                  Keywords with Weights
+                                                </h5>
+                                              </div>
+                                            </div>
+                                            <div
+                                              className={`chart-line-output ${
+                                                showgraph ? "show" : ""
+                                              }`}
+                                              style={{ height: "400px" }}
+                                            >
+                                              <Bar
+                                                ref={chartRef}
+                                                data={barChartData}
+                                                options={{
+                                                  responsive: true,
+                                                  scales: {
+                                                    x: {
+                                                      beginAtZero: true,
+                                                    },
+                                                    y: {
+                                                      beginAtZero: true,
+                                                    },
+                                                  },
+                                                }}
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
                                       </div>
                                     </div>
+
                                     <Box
                                       sx={{
                                         display: "flex",

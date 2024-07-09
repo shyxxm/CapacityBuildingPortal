@@ -8,9 +8,11 @@ from DashboardApi.project_details import project_details_api
 
 from DashboardApi.add_manager import add_manager_api
 from DashboardApi.add_trainer import add_trainer_api
+from DashboardApi.add_trainee import add_trainee_api
 from DashboardApi.login import login_api
 from DashboardApi.view_managers import view_managers_api,delete_manager_api, edit_manager_api
 from DashboardApi.view_trainers import view_trainers_api, delete_trainer_api, edit_trainer_api
+from DashboardApi.view_trainees import view_trainees_api, delete_trainee_api, edit_trainee_api, view_programs_courses_api
 from DashboardApi.create_project import create_project_api
 from DashboardApi.text_analysis import text_analysis_api
 
@@ -97,6 +99,14 @@ app.register_blueprint(view_all_courses_api)
 app.register_blueprint(get_center_id_by_name_api)
 app.register_blueprint(view_center_count_api)
 app.register_blueprint(view_course_count_api)
+app.register_blueprint(add_trainee_api)
+
+app.register_blueprint(delete_trainee_api)
+app.register_blueprint(edit_trainee_api)
+app.register_blueprint(view_trainees_api)
+app.register_blueprint(view_programs_courses_api)
+
+
 
 
 if __name__ == "__main__":

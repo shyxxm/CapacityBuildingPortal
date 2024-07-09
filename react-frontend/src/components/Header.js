@@ -5,12 +5,14 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
+import { useNavigate } from "react-router-dom";
 import UserContext from "../services/UserContext";
 
 const settings = ["Account", "Logout"];
 
 function Header() {
-  const { userData } = useContext(UserContext);
+  const { userData, setUserData } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const [anchorElUser, setAnchorElUser] = useState(null);
 
@@ -28,9 +30,16 @@ function Header() {
     // You can perform additional actions or navigate to another page, etc.
   };
 
+  const handleLogout = () => {
+    // Clear user data
+    setUserData(null);
+    // Redirect to login page
+    navigate("/Login");
+  };
+
   return (
     <Fragment>
-      {/*  Header Start */}
+      {/* Header Start */}
       <header className="app-header">
         <nav className="navbar navbar-expand-lg navbar-light">
           <ul className="navbar-nav">
@@ -83,7 +92,15 @@ function Header() {
                   onClose={handleCloseUserMenu}
                 >
                   {settings.map((setting) => (
-                    <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                    <MenuItem
+                      key={setting}
+                      onClick={() => {
+                        handleCloseUserMenu();
+                        if (setting === "Logout") {
+                          handleLogout();
+                        }
+                      }}
+                    >
                       <Typography textAlign="center">{setting}</Typography>
                     </MenuItem>
                   ))}
@@ -91,12 +108,12 @@ function Header() {
               </li>
             </ul>
             <a target="_blank" className="btn btn-primary">
-              {/* {userData.firstName} */}
+              {userData.firstName}
             </a>
           </div>
         </nav>
       </header>
-      {/*  Header End */}
+      {/* Header End */}
     </Fragment>
   );
 }

@@ -74,41 +74,32 @@ def process_text():
         joined = re.sub(r'"', "", joined)
 
         # Call the function to analyze text
-        # keyphrases = extract_keyphrases(joined)
-        predictions_with_labels, important_words = analyze_text(joined)
+        predictions_with_labels, important_words_with_weights = analyze_text(joined)
         predicted_sentiment = predict_sentiment(joined)
-        # sdg, keywords, sentiment, sdg_scores, most_likely_sdg = chatgpt(joined)
 
         return jsonify({
             'message': 'Text processed successfully',
             'text': joined,
             'predictions': predictions_with_labels,
-            'important_words': important_words,
+            'important_words': important_words_with_weights,
             'sentiment': predicted_sentiment,
-            # 'keyphrases': list(keyphrases),
-            # 'chatgpt_sdg': sdg,
-            # 'chatgpt_keywords': keywords,
-            # 'chatgpt_sentiment': sentiment,
-            # 'chatgpt_sdg_scores': sdg_scores,
-            # 'chatgpt_most_likely_sdg': most_likely_sdg
         })
     else:
         return jsonify({'error': 'Text not found in request'}), 400
 
 def analyze_text(joined):
-    # Replace 'shyxm/sdg_classification' with your actual model repository
-    model_name = "shyxm/sdg_classification"
-    subfolder = "SDGFinal"
+    model_name = "shyxm/SDGClassification16SDGs"
+    subfolder = "corrected_model"
 
-    # Load the tokenizer and model from the Hugging Face Hub
+    # Load the tokenizer and model from the Hugging Face Hub with subfolder
     tokenizer = AutoTokenizer.from_pretrained(model_name, subfolder=subfolder)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, subfolder=subfolder)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, subfolder=subfolder, output_attentions=True)
 
     # Ensure the model is in evaluation mode
     model.eval()
-    inputs = tokenizer(joined, return_tensors="pt", padding=True, truncation=True)
+    inputs = tokenizer(joined, return_tensors="pt", padding=True, truncation=True, max_length=512)
     with torch.no_grad():
-        outputs = model(**inputs, output_attentions=True)
+        outputs = model(**inputs)
         logits = outputs.logits
         attentions = outputs.attentions  # This contains the attention weights
 
@@ -124,19 +115,19 @@ def analyze_text(joined):
 
         # Extract attention weights from the last layer
         last_layer_attentions = attentions[-1]
-        # Take the mean attention weights across all heads
-        mean_attentions = last_layer_attentions.mean(dim=1).squeeze()
+        # Take the mean attention weights across all heads and sequences (dimension 1 and 2)
+        mean_attentions = last_layer_attentions.mean(dim=1).mean(dim=1).squeeze()
 
         # Determine the number of tokens to consider
         num_tokens = mean_attentions.size(0)
         k = min(15, num_tokens)
 
         # Get the token indices with the highest attention weights
-        important_tokens = mean_attentions.mean(dim=0).topk(k=k).indices
+        important_tokens = mean_attentions.topk(k=k).indices
 
         # Convert token indices to words and filter out special tokens and punctuation
         tokens = tokenizer.convert_ids_to_tokens(inputs['input_ids'][0])
-        important_words = []
+        important_words_with_weights = []
         for idx in important_tokens:
             token = tokens[idx]
             if token in tokenizer.all_special_tokens or token in string.punctuation:
@@ -145,18 +136,17 @@ def analyze_text(joined):
                 original_word_part = token[2:]
                 for word in joined.split():
                     if original_word_part in word:
-                        important_words.append(word)
+                        important_words_with_weights.append({'word': word, 'weight': mean_attentions[idx].item()})
                         break
             else:
-                important_words.append(token)
+                important_words_with_weights.append({'word': token, 'weight': mean_attentions[idx].item()})
 
         # Remove duplicates while preserving order
         seen = set()
-        important_words = [x for x in important_words if not (x in seen or seen.add(x))]
-        print(f"Keywords: {predictions_with_labels}")
+        important_words_with_weights = [x for x in important_words_with_weights if not (x['word'] in seen or seen.add(x['word']))]
+        print(f"Keywords with weights: {important_words_with_weights}")
 
-    return predictions_with_labels, important_words
-
+    return predictions_with_labels, important_words_with_weights
 
 # Define the function to predict sentiment
 def predict_sentiment(joined):

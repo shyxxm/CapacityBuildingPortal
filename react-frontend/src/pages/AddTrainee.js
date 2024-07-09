@@ -18,7 +18,8 @@ function AddTrainee() {
   const [traineeData, setTraineeData] = useState([]);
   const [trainee_name, setTraineeName] = useState("");
   const [join_date, setJoinDate] = React.useState(dayjs());
-  const [end_date, setEndDate] = React.useState(dayjs());
+  const [trainee_employment, setTraineeEmployment] = useState("");
+
   const [open, setOpen] = React.useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ function AddTrainee() {
   };
 
   const validateFields = () => {
-    if (!trainee_name || !join_date) {
+    if (!trainee_name || !join_date || !trainee_employment) {
       setError("All fields are required");
       return false;
     }
@@ -65,16 +66,21 @@ function AddTrainee() {
 
     // Validate CSV data
     if (
-      traineeData.some((trainee) => !trainee.trainee_name || !trainee.join_date)
+      traineeData.some(
+        (trainee) =>
+          !trainee.trainee_name ||
+          !trainee.join_date ||
+          !trainee.trainee_employment
+      )
     ) {
       setError("All fields in the CSV file are required");
       return;
     }
 
     traineeData.forEach((trainee) => {
-      const { trainee_name, join_date } = trainee;
+      const { trainee_name, join_date, trainee_employment } = trainee;
       axios
-        .post("/add_trainee", { trainee_name, join_date })
+        .post("/add_trainee", { trainee_name, join_date, trainee_employment })
         .then((response) => {
           console.log("Trainees created successfully:", response.data);
         })
@@ -95,7 +101,11 @@ function AddTrainee() {
     if (!validateFields()) return;
 
     axios
-      .post("/add_trainee", { trainee_name, join_date })
+      .post("/add_trainee", {
+        trainee_name,
+        join_date: join_date.format("YYYY-MM-DD"), // Ensure date is properly formatted
+        trainee_employment,
+      })
       .then((response) => {
         handleClick();
         console.log("Trainee created successfully:", response.data);
@@ -187,9 +197,9 @@ function AddTrainee() {
                           id="trainee-employment"
                           label="Trainee Employment"
                           variant="outlined"
-                          value={trainee_name}
+                          value={trainee_employment}
                           onChange={(event) =>
-                            setTraineeName(event.target.value)
+                            setTraineeEmployment(event.target.value)
                           }
                           sx={{ width: "300px" }}
                         />
