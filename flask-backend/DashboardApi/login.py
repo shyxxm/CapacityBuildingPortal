@@ -3,8 +3,11 @@ from db import cnx
 
 login_api = Blueprint('login_api', __name__)
 
-@login_api.route("/login", methods=['POST'])
+@login_api.route("/login", methods=['POST', 'OPTIONS'])
 def login():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
+
     try:
         # Get username and password from request
         login_data = request.json
@@ -22,7 +25,6 @@ def login():
         cursor.execute('SELECT first_name, username FROM public."Managers" WHERE username = %s AND password = %s', (username, password))
         manager = cursor.fetchone()
 
-
         # Close the cursor
         cursor.close()
 
@@ -37,3 +39,4 @@ def login():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+

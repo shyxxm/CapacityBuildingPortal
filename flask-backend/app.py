@@ -28,7 +28,8 @@ from DashboardApi.project_config import view_centers_api, add_center_api, get_pr
 from db import cnx
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})  # Enable CORS for all routes
+
 cnx = None  # Define cnx as a global variable
 
 # Sample Members API
