@@ -85,6 +85,17 @@ function Nav() {
                     </a>
                   </Link>
                 </li>
+                <li className="sidebar-item">
+                  <Link to="/ProjectUpdates">
+                    <a className="sidebar-link" aria-expanded="false">
+                      <span>
+                        <i className="ti ti-bell-z" />
+                      </span>
+                      <span className="hide-menu">Project Updates</span>
+                    </a>
+                  </Link>
+                </li>
+
                 {/* <li className="sidebar-item">
                   <Link to="/CenterConfig">
                     <a className="sidebar-link" aria-expanded="false">
@@ -99,6 +110,7 @@ function Nav() {
                   <i className="ti ti-dots nav-small-cap-icon fs-4" />
                   <span className="hide-menu">Project Reports</span>
                 </li>
+
                 {/* <li className="sidebar-item">
                   <Link to="/">
                     <a className="sidebar-link" aria-expanded="false">

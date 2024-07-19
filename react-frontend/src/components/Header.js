@@ -1,10 +1,16 @@
-import React, { Fragment, useState, useContext } from "react";
+import React, { Fragment, useState, useContext, useEffect } from "react";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
+import DoneIcon from "@mui/icons-material/Done";
+import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import UserContext from "../services/UserContext";
 
@@ -15,6 +21,8 @@ function Header() {
   const navigate = useNavigate();
 
   const [anchorElUser, setAnchorElUser] = useState(null);
+  const [anchorElNotifications, setAnchorElNotifications] = useState(null);
+  const [notifications, setNotifications] = useState([]);
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -24,22 +32,59 @@ function Header() {
     setAnchorElUser(null);
   };
 
-  const handleNotificationClick = () => {
-    // Add your functionality here
-    console.log("Notification bell clicked!");
-    // You can perform additional actions or navigate to another page, etc.
+  const handleOpenNotificationsMenu = (event) => {
+    setAnchorElNotifications(event.currentTarget);
+    fetchNotifications();
+  };
+
+  const handleCloseNotificationsMenu = () => {
+    setAnchorElNotifications(null);
+  };
+
+  const fetchNotifications = () => {
+    const username = userData.username;
+
+    axios
+      .post("/get_notifications", { username })
+      .then((response) => {
+        setNotifications(response.data.notifications);
+      })
+      .catch((error) => {
+        console.error("Error fetching notifications:", error);
+      });
+  };
+
+  const markAsRead = (progress_id) => {
+    axios
+      .post("/respond_notification", { progress_id })
+      .then((response) => {
+        fetchNotifications(); // Refresh notifications after marking as read
+      })
+      .catch((error) => {
+        console.error("Error marking notification as read:", error);
+      });
   };
 
   const handleLogout = () => {
-    // Clear user data
     setUserData(null);
-    // Redirect to login page
     navigate("/Login");
+  };
+
+  const getBackgroundColor = (status) => {
+    switch (status.toLowerCase()) {
+      case "yellow":
+        return "#FFF9C4"; // Light Yellow
+      case "green":
+        return "#C8E6C9"; // Light Green
+      case "red":
+        return "#FFCDD2"; // Light Red
+      default:
+        return "white";
+    }
   };
 
   return (
     <Fragment>
-      {/* Header Start */}
       <header className="app-header">
         <nav className="navbar navbar-expand-lg navbar-light">
           <ul className="navbar-nav">
@@ -53,14 +98,81 @@ function Header() {
               </a>
             </li>
             <li className="nav-item">
-              <a
+              <IconButton
                 className="nav-link nav-icon-hover"
-                href="javascript:void(0)"
-                onClick={handleNotificationClick}
+                onClick={handleOpenNotificationsMenu}
               >
                 <i className="ti ti-bell-ringing" />
                 <div className="notification bg-primary rounded-circle" />
-              </a>
+              </IconButton>
+              <Menu
+                id="notifications-menu"
+                anchorEl={anchorElNotifications}
+                open={Boolean(anchorElNotifications)}
+                onClose={handleCloseNotificationsMenu}
+                MenuListProps={{
+                  "aria-labelledby": "notifications-button",
+                }}
+                PaperProps={{
+                  style: {
+                    width: "400px",
+                  },
+                }}
+              >
+                {notifications.length === 0 ? (
+                  <MenuItem onClick={handleCloseNotificationsMenu}>
+                    No new notifications
+                  </MenuItem>
+                ) : (
+                  <List>
+                    {notifications.map((notification) => (
+                      <ListItem
+                        key={notification.progress_id}
+                        alignItems="flex-start"
+                        style={{
+                          backgroundColor: getBackgroundColor(
+                            notification.progress_status
+                          ),
+                          marginBottom: "10px",
+                          borderRadius: "8px",
+                          padding: "16px",
+                          border: "2px solid #ccc",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <div>
+                          <Typography
+                            component="span"
+                            variant="body1"
+                            color="textPrimary"
+                            style={{ display: "block", marginBottom: "5px" }}
+                          >
+                            {notification.update_details}
+                          </Typography>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="textSecondary"
+                          >
+                            {notification.project_name}
+                          </Typography>
+                        </div>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={<DoneIcon />}
+                          onClick={() => markAsRead(notification.progress_id)}
+                          style={{ marginLeft: "16px" }}
+                        >
+                          Respond
+                        </Button>
+                      </ListItem>
+                    ))}
+                  </List>
+                )}
+              </Menu>
             </li>
           </ul>
           <div
@@ -113,7 +225,6 @@ function Header() {
           </div>
         </nav>
       </header>
-      {/* Header End */}
     </Fragment>
   );
 }

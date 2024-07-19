@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Nav from "../components/NavBar";
-import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import axios from "axios";
 
 const Progress = ["Red", "Yellow", "Green"];
 
@@ -31,6 +30,8 @@ function ProjectDetails() {
   const [selectedProgress, setSelectedProgress] = useState("");
   const [projectUpdate, setProjectUpdate] = useState("");
   const [KPIs, setKPIs] = useState([]); // State for KPIs
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProgramName();
@@ -142,7 +143,7 @@ function ProjectDetails() {
 
   const handleSubmit = () => {
     const formData = {
-      projectName: projectName,
+      projectName: projectName, // Adjusted to string format
       OKR: selectedOKR,
       KPI: selectedKPI,
       progress: selectedProgress,
@@ -151,7 +152,16 @@ function ProjectDetails() {
       update: projectUpdate,
     };
     console.log("Submitted data:", formData);
-    // Here you can proceed with sending the formData to your backend or performing any other action
+    // Send formData to the backend API
+    axios
+      .post("/add_progress", formData)
+      .then((response) => {
+        console.log("Progress added successfully:", response.data);
+        navigate("/dashboard"); // Redirect to the dashboard
+      })
+      .catch((error) => {
+        console.error("Error adding progress:", error);
+      });
   };
 
   return (
@@ -249,7 +259,6 @@ function ProjectDetails() {
                 </div>
               </div>
             </div>
-            {/* Remaining card components */}
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title fw-semibold mb-4">
@@ -322,7 +331,6 @@ function ProjectDetails() {
                     onInput={handleTrainerChange}
                     sx={{ width: 300 }} // Adjust the width as needed
                   />
-
                   <div style={{ marginLeft: "48px" }}>
                     <TextField
                       id="outlined-required-multiline-flexible"
@@ -339,15 +347,13 @@ function ProjectDetails() {
               </div>
             </div>{" "}
             <div className="centered-button" style={{ marginTop: 40 }}>
-              <Link to="/dashboard">
-                <button
-                  type="button"
-                  className="btn btn-outline-success m-1"
-                  onClick={handleSubmit}
-                >
-                  Submit
-                </button>
-              </Link>
+              <button
+                type="button"
+                className="btn btn-outline-success m-1"
+                onClick={handleSubmit}
+              >
+                Submit
+              </button>
             </div>
           </div>
         </div>

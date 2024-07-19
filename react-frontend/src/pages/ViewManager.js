@@ -125,8 +125,8 @@ function ViewManager() {
     fetch("/view_managers_sort")
       .then((res) => res.json())
       .then((response) => {
-        const data = response.data.map((item, index) => ({
-          id: index + 1,
+        const data = response.data.map((item) => ({
+          id: item[0], // Use the manager_id as the unique id
           manager_id: item[0],
           manager_name: item[1],
           manager_username: item[2],
@@ -145,19 +145,19 @@ function ViewManager() {
 
   const handleSelectionModelChange = (newSelection) => {
     setSelectedRows(newSelection);
-    console.log("Selected rows:", newSelection); // Added log to verify selection
+    console.log("Selected rows:", newSelection);
   };
 
   const handleDelete = () => {
     console.log("Deleting rows:", selectedRows);
 
-    selectedRows.forEach((id) => {
+    selectedRows.forEach((manager_id) => {
       fetch(`/delete_manager`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ manager_id: id }),
+        body: JSON.stringify({ manager_id }),
       })
         .then((response) => {
           if (!response.ok) {
@@ -169,7 +169,7 @@ function ViewManager() {
           if (data.error) {
             console.error("Error deleting manager:", data.error);
           } else {
-            console.log("Manager deleted successfully:", id);
+            console.log("Manager deleted successfully:", manager_id);
           }
         })
         .catch((error) => {
@@ -178,7 +178,7 @@ function ViewManager() {
     });
 
     const remainingRows = chartData.filter(
-      (row) => !selectedRows.includes(row.id)
+      (row) => !selectedRows.includes(row.manager_id)
     );
     setChartData(remainingRows);
     setSelectedRows([]);
@@ -186,7 +186,9 @@ function ViewManager() {
 
   const handleEdit = () => {
     if (selectedRows.length === 1) {
-      const managerToEdit = chartData.find((row) => row.id === selectedRows[0]);
+      const managerToEdit = chartData.find(
+        (row) => row.manager_id === selectedRows[0]
+      );
       setFormData(managerToEdit);
       setEditDialogOpen(true);
       setErrorMessage(""); // Clear any previous error message

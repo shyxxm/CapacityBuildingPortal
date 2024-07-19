@@ -23,7 +23,17 @@ function AddManager() {
     Papa.parse(file, {
       header: true,
       complete: (results) => {
-        setManagerData(results.data);
+        const cleanedData = results.data.filter(
+          (manager) =>
+            manager.first_name &&
+            manager.first_name.trim() &&
+            manager.username &&
+            manager.username.trim() &&
+            manager.password &&
+            manager.password.trim()
+        );
+        console.log(cleanedData); // Log the cleaned data
+        setManagerData(cleanedData);
       },
     });
   };

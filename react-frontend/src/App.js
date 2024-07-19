@@ -23,6 +23,7 @@ import ProjectConfig from "./pages/ProjectConfig";
 import TextAnalysis from "./pages/TextAnalysis";
 import AddTrainee from "./pages/AddTrainee";
 import CenterConfig from "./pages/CenterConfig";
+import ProjectUpdates from "./pages/ProjectUpdates";
 
 import { UserProvider } from "./services/UserContext"; // Import UserProvider from UserContext
 import PrivateRoutes from "./services/PrivateRoutes";
@@ -57,6 +58,7 @@ function App() {
               <Route path="/AddTrainee" element={<AddTrainee />} />
               <Route path="/CenterConfig" element={<CenterConfig />} />
               <Route path="/ViewTrainee" element={<ViewTrainee />} />
+              <Route path="/ProjectUpdates" element={<ProjectUpdates />} />
             </Route>
           </Routes>
         </UserProvider>

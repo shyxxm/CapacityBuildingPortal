@@ -27,3 +27,9 @@ env/
 /env
 
 ./env
+
+/new_env
+
+flask-backend/new_env
+
+./new_env

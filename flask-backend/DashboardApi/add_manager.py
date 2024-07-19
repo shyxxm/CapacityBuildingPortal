@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from db import cnx
+import psycopg2
 
 add_manager_api = Blueprint('add_manager_api', __name__)
 

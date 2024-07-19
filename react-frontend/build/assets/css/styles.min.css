@@ -16240,3 +16240,15 @@ font-family: 'Trebuchet MS';
   .chart-line-output.show {
     opacity: 1;
   }
+
+  .row-green {
+    background-color: #d4edda; /* Light green */
+  }
+  
+  .row-yellow {
+    background-color: #fff3cd; /* Light yellow */
+  }
+  
+  .row-red {
+    background-color: #f8d7da; /* Light red */
+  }

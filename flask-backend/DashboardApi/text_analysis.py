@@ -4,12 +4,13 @@ from dotenv import load_dotenv
 from flask import Blueprint, request, jsonify
 from PyPDF2 import PdfReader
 import textract
-import nltk
 import regex as re
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoModelForTokenClassification, pipeline
 import numpy as np
 import string
+import nltk
+from nltk.corpus import stopwords
 
 # # Load environment variables from .env file
 # load_dotenv()
@@ -35,6 +36,8 @@ import string
 # model.eval()
 
 text_analysis_api = Blueprint('text_analysis_api', __name__)
+
+
 
 # Route to upload file and get predicted SDG
 @text_analysis_api.route('/upload_file', methods=['POST'])
@@ -97,7 +100,10 @@ def analyze_text(joined):
 
     # Ensure the model is in evaluation mode
     model.eval()
+
+    # Truncate the input text if it exceeds the maximum length
     inputs = tokenizer(joined, return_tensors="pt", padding=True, truncation=True, max_length=512)
+    
     with torch.no_grad():
         outputs = model(**inputs)
         logits = outputs.logits
@@ -118,42 +124,97 @@ def analyze_text(joined):
         # Take the mean attention weights across all heads and sequences (dimension 1 and 2)
         mean_attentions = last_layer_attentions.mean(dim=1).mean(dim=1).squeeze()
 
-        # Determine the number of tokens to consider
-        num_tokens = mean_attentions.size(0)
-        k = min(15, num_tokens)
-
-        # Get the token indices with the highest attention weights
-        important_tokens = mean_attentions.topk(k=k).indices
-
         # Convert token indices to words and filter out special tokens and punctuation
         tokens = tokenizer.convert_ids_to_tokens(inputs['input_ids'][0])
         important_words_with_weights = []
-        for idx in important_tokens:
+
+        for idx in range(len(tokens)):
             token = tokens[idx]
             if token in tokenizer.all_special_tokens or token in string.punctuation:
                 continue
-            if token.startswith("##"):
-                original_word_part = token[2:]
-                for word in joined.split():
-                    if original_word_part in word:
-                        important_words_with_weights.append({'word': word, 'weight': mean_attentions[idx].item()})
-                        break
+            weight = mean_attentions[idx].item()
+            important_words_with_weights.append({'word': token, 'weight': weight})
+
+        # Sort words by weight in descending order and take the top 30 to ensure variety
+        important_words_with_weights.sort(key=lambda x: x['weight'], reverse=True)
+        important_words_with_weights = important_words_with_weights[:30]
+
+        # Debug print before processing
+        print(f"Important words with weights (before processing): {important_words_with_weights}")
+
+        # Combine subwords properly
+        combined_words_with_weights = []
+        current_word = ""
+        current_weight = 0
+        for word_info in important_words_with_weights:
+            token_word = word_info['word']
+            weight = word_info['weight']
+            if token_word.startswith("##"):
+                current_word += token_word[2:]
+                current_weight += weight
             else:
-                important_words_with_weights.append({'word': token, 'weight': mean_attentions[idx].item()})
+                if current_word:
+                    combined_words_with_weights.append({'word': current_word, 'weight': current_weight})
+                current_word = token_word
+                current_weight = weight
+        if current_word:
+            combined_words_with_weights.append({'word': current_word, 'weight': current_weight})
+
+        # Match tokens back to the original words and clean them
+        stop_words = set(stopwords.words('english'))
+        matched_words_with_weights = []
+        original_words = joined.split()
+        for word_info in combined_words_with_weights:
+            token_word = word_info['word']
+            best_match = None
+            best_match_weight = word_info['weight']
+            for original_word in original_words:
+                clean_original_word = original_word.strip(string.punctuation).lower()
+                if token_word in clean_original_word:
+                    best_match = original_word
+                    break
+            if best_match:
+                clean_word = best_match.strip(string.punctuation + string.digits).lower()
+                if clean_word and clean_word not in stop_words and clean_word not in string.punctuation and len(clean_word) > 1:
+                    matched_words_with_weights.append({'word': clean_word, 'weight': best_match_weight})
+
+        # Debug print after processing
+        print(f"Matched words with weights (after processing): {matched_words_with_weights}")
 
         # Remove duplicates while preserving order
         seen = set()
-        important_words_with_weights = [x for x in important_words_with_weights if not (x['word'] in seen or seen.add(x['word']))]
-        print(f"Keywords with weights: {important_words_with_weights}")
+        matched_words_with_weights = [x for x in matched_words_with_weights if not (x['word'] in seen or seen.add(x['word']))]
 
-    return predictions_with_labels, important_words_with_weights
+        # Ensure we have exactly 10 words, taking the top 10 highest weights
+        matched_words_with_weights = sorted(matched_words_with_weights, key=lambda x: x['weight'], reverse=True)[:10]
 
-# Define the function to predict sentiment
+        print(f"Keywords with weights: {matched_words_with_weights}")
+
+    return predictions_with_labels, matched_words_with_weights
+
 def predict_sentiment(joined):
     sentiment_analysis = pipeline("sentiment-analysis", model="siebert/sentiment-roberta-large-english")
-    result = sentiment_analysis(joined)
-    # Assuming 'POSITIVE' label is for positive sentiment and 'NEGATIVE' label is for negative sentiment
-    predicted_sentiment = "positive" if result[0]['label'] == 'POSITIVE' else "negative"
+    max_length = sentiment_analysis.tokenizer.model_max_length
+
+    # Tokenize the input text
+    tokens = sentiment_analysis.tokenizer.tokenize(joined)
+
+    # Split the tokens into chunks of the model's max length
+    chunks = [tokens[i:i + max_length] for i in range(0, len(tokens), max_length)]
+
+    # Analyze sentiment for each chunk
+    sentiments = []
+    for chunk in chunks:
+        chunk_text = sentiment_analysis.tokenizer.convert_tokens_to_string(chunk)
+        result = sentiment_analysis(chunk_text)
+        sentiments.append(result[0])
+
+    # Determine overall sentiment based on majority vote
+    positive_count = sum(1 for sentiment in sentiments if sentiment['label'] == 'POSITIVE')
+    negative_count = len(sentiments) - positive_count
+
+    predicted_sentiment = "positive" if positive_count > negative_count else "negative"
+    
     return predicted_sentiment
 
 # def extract_keyphrases(text, model_name="ml6team/keyphrase-extraction-kbir-kpcrowd"):

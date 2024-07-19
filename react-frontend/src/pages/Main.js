@@ -4,6 +4,7 @@ import gsap from "gsap";
 import SplitTextJS from "split-text-js";
 import React, { useEffect, useRef, useState } from "react";
 import Header from "../components/Header";
+import axios from "../services/axiosConfig"; // Use the configured Axios instance
 
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -23,16 +24,10 @@ function Main() {
 
   // function to fetch data
   const fetchData = () => {
-    fetch("/view_trainer_data")
+    axios
+      .get("/view_trainer_data")
       .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
-      .then((chartData) => {
-        setChartData(chartData);
+        setChartData(res.data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -40,16 +35,10 @@ function Main() {
   };
 
   const fetchCourseData = () => {
-    fetch("/view_course_count")
+    axios
+      .get("/view_course_count")
       .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
-      .then((courseData) => {
-        setCourseData(courseData);
+        setCourseData(res.data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -57,16 +46,10 @@ function Main() {
   };
 
   const fetchCenterData = () => {
-    fetch("/view_center_count")
+    axios
+      .get("/view_center_count")
       .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
-      .then((centerData) => {
-        setCenterData(centerData);
+        setCenterData(res.data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -75,16 +58,10 @@ function Main() {
 
   // function to fetch data
   const fetchProgramData = () => {
-    fetch("/view_program_count")
+    axios
+      .get("/view_program_count")
       .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
-      .then((programData) => {
-        setProgramData(programData);
+        setProgramData(res.data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -93,16 +70,10 @@ function Main() {
 
   // function to fetch data
   const fetchProgramName = () => {
-    fetch("/view_program_name")
+    axios
+      .get("/view_program_name")
       .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
-      .then((programName) => {
-        setProgramName(programName);
+        setProgramName(res.data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -234,6 +205,7 @@ function Main() {
               <p className="p2">Capacity Building Programs</p>
               <p className="p2">Social Interventions</p>
               <p className="p2">Programs Monitoring</p>
+              <p className="p2">Skill Interventions Portal</p>
             </div>
           </div>
           <div className="centered-container">

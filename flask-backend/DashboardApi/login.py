@@ -22,7 +22,7 @@ def login():
         cursor = cnx.cursor()
 
         # Check if the username and password match a record in the Managers table
-        cursor.execute('SELECT first_name, username FROM public."Managers" WHERE username = %s AND password = %s', (username, password))
+        cursor.execute('SELECT manager_id, first_name, username FROM public."Managers" WHERE username = %s AND password = %s', (username, password))
         manager = cursor.fetchone()
 
         # Close the cursor
@@ -30,13 +30,14 @@ def login():
 
         if manager:
             # If manager is found, extract the necessary information
-            first_name = manager[0]  # Assuming first_name is the first column
-            username = manager[1]    # Assuming username is the second column
-            return jsonify({"message": "Login successful.", "firstName": first_name, "username": username}), 200
+            manager_id = manager[0]
+            first_name = manager[1]
+            username = manager[2]
+
+            return jsonify({"message": "Login successful.", "firstName": first_name, "username": username, "managerId": manager_id}), 200
         else:
             # If manager is not found, return error message
             return jsonify({"error": "Invalid username or password."}), 401
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-

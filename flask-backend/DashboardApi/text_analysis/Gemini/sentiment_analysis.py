@@ -15,7 +15,7 @@ def analyze_sentiment(text):
 
     # Define the prompt template
     prompt = (
-        f"Perform sentiment analysis on the following text, indicating whether the sentiment is positive, negative, or neutral.\n\n"
+        f"Perform sentiment analysis on the following text, indicating whether the sentiment is positive or negative.\n\n"
         f"Text: \"{text}\"\n\n"
         f"Sentiment:"
     )
@@ -23,14 +23,18 @@ def analyze_sentiment(text):
     # Generate text using the model and prompt
     response = model.generate_content(prompt)
 
+    # Check if response has candidates
     sentiment = ""
-    if response._result.candidates:
-        content = response._result.candidates[0].content.parts[0].text
-        lines = content.split("\n")
-        
-        for line in lines:
-            if line.startswith("Sentiment:"):
-                sentiment = line.split(":")[-1].strip().lower()
+    if response.candidates:
+        content = response.candidates[0].content
+
+        # Extract the text from the content parts
+        if content.parts:
+            sentiment = content.parts[0].text.strip().lower()
+        else:
+            print("No parts found in content.")
+    else:
+        print("No candidates found in the response.")
 
     return sentiment
 
