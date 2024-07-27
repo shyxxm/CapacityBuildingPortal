@@ -23,8 +23,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers-pro";
 import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
-import axios from 'axios';
-
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 
 import {
   Unstable_NumberInput as BaseNumberInput,
@@ -43,9 +42,6 @@ import DialogTitle from "@mui/material/DialogTitle";
 
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-
-
-
 
 const blue = {
   100: "#DAECFF",
@@ -247,69 +243,51 @@ function getStyles(name, personName, theme) {
 }
 
 function CreateProject() {
+  // Get-Mangager API
 
-// Get-Mangager API
+  const [getManagers, setGetManagers] = useState({ data: [[]] });
 
-const [getManagers, setGetManagers] = useState({ data: [[]] });
-
-// function to fetch manager data
-const fetchData = () => {
-  fetch('/view_managers')
-    .then(res => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        throw new Error('Server response not OK');
-      }
-    })
-    .then(data => {
-      setGetManagers(data); // Change the parameter name to 'data' or something else
-    })
-    .catch(error => {
-      console.error('Error fetching data:', error);
-    });
-};
+  // Function to fetch manager data
+  const fetchData = () => {
+    axios
+      .get("/view_managers")
+      .then((res) => {
+        setGetManagers(res.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
 
   useEffect(() => {
-    // Call fetchData immediately on component mount
     fetchData();
 
-    // Set up a periodic fetch
     const intervalId = setInterval(fetchData, 5000); // Fetch every 5000 milliseconds (5 seconds)
-
-    // Clear interval on component unmount
     return () => clearInterval(intervalId);
   }, []);
-
 
   const [activeStep, setActiveStep] = React.useState(0);
   const [openSnack, setOpenSnack] = React.useState(false);
   const navigate = useNavigate();
 
-// Goes to the next step in the 3 step process
-const handleNext = () => {
-  setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  console.log(formValues);
+  // Goes to the next step in the 3 step process
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    console.log(formValues);
 
-  // Check if the current step is the one where you want to open the dialog
-  if (activeStep === steps.length - 1) {
-    handleClickOpen(); // Call the function to open the dialog
+    if (activeStep === steps.length - 1) {
+      handleClickOpen();
+      axios
+        .post("/create_project", formValues)
+        .then((response) => {
+          console.log("Data sent successfully:", response.data);
+        })
+        .catch((error) => {
+          console.error("Error sending data:", error);
+        });
+    }
+  };
 
-    // Make HTTP POST request to your backend API
-    axios.post('/create_project', formValues)
-      .then((response) => {
-        // Handle success
-        console.log('Data sent successfully:', response.data);
-      })
-      .catch((error) => {
-        // Handle error
-        console.error('Error sending data:', error);
-      });
-  }
-};
-
-
-  // Goes back one step
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
@@ -318,17 +296,14 @@ const handleNext = () => {
     setActiveStep(0);
   };
 
-  // Main for opening snack
   const handleSnackClick = () => {
     setOpenSnack(true);
   };
 
-  // Main for closing snack
   const handleSnackClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-
     setOpen(false);
     navigate("/dashboard");
   };
@@ -337,7 +312,6 @@ const handleNext = () => {
     setOpen(true);
   };
 
-  // Goes back from dialog
   const handleClose = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
@@ -356,7 +330,7 @@ const handleNext = () => {
     startDate: dayjs().format("DD-MM-YYYY"),
     endDate: dayjs().format("DD-MM-YYYY"),
     okrNumber: null,
-    okrValues: [], // Object to store OKR values
+    okrValues: [],
   });
 
   const handleInputChange = (event) => {
@@ -401,18 +375,13 @@ const handleNext = () => {
     kpiNumber
   ) => {
     const okrKey = `OkrValue${okrIndex + 1}`;
-
-    // Check if okrDate is a non-empty string before formatting
     const formattedDate = okrDate ? dayjs(okrDate).format("YYYY") : "";
-
-    // Initialize an empty object to store KPI values and dates
     const kpiData = {};
 
-    // Loop to populate KPI data within the OKR
     for (let kpiIndex = 0; kpiIndex < kpiNumber; kpiIndex++) {
       kpiData[`Kpi${kpiIndex + 1}`] = {
-        KpiName: "", // You can set a default value or get it from the UI
-        KpiDate: null, // You can set a default value or get it from the UI
+        KpiName: "",
+        KpiDate: null,
       };
     }
 
@@ -426,12 +395,11 @@ const handleNext = () => {
           OkrDate: formattedDate,
           MonthRange: monthRange,
           KPINumber: kpiNumber,
-          KPIs: kpiData, // Add KPI data to the OKR
+          KPIs: kpiData,
         },
       },
     }));
 
-    // Also update the KPI number in the separate state
     setKpiNumbers((prevNumbers) => {
       const updatedNumbers = [...prevNumbers];
       updatedNumbers[okrIndex] = kpiNumber;
@@ -454,10 +422,7 @@ const handleNext = () => {
   const [maxWidth, setMaxWidth] = React.useState("md");
 
   const handleMaxWidthChange = (event) => {
-    setMaxWidth(
-      // @ts-expect-error autofill of arbitrary value is not handled.
-      event.target.value
-    );
+    setMaxWidth(event.target.value);
   };
 
   const handleFullWidthChange = (event) => {

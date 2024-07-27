@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Nav from "../components/NavBar";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import axios from "axios";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
@@ -17,10 +17,9 @@ import Papa from "papaparse";
 function AddTrainee() {
   const [traineeData, setTraineeData] = useState([]);
   const [trainee_name, setTraineeName] = useState("");
-  const [join_date, setJoinDate] = React.useState(dayjs());
+  const [join_date, setJoinDate] = useState(dayjs());
   const [trainee_employment, setTraineeEmployment] = useState("");
-
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -77,21 +76,21 @@ function AddTrainee() {
       return;
     }
 
-    traineeData.forEach((trainee) => {
-      const { trainee_name, join_date, trainee_employment } = trainee;
-      axios
-        .post("/add_trainee", { trainee_name, join_date, trainee_employment })
-        .then((response) => {
-          console.log("Trainees created successfully:", response.data);
-        })
-        .catch((error) => {
-          console.error("Error creating Trainee:", error);
-        });
-    });
-    handleClick();
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 3000);
+    const requests = traineeData.map((trainee) =>
+      axios.post("/add_trainee", trainee)
+    );
+
+    Promise.all(requests)
+      .then((responses) => {
+        console.log("Trainees created successfully:", responses);
+        handleClick();
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error("Error creating trainees:", error);
+      });
   };
 
   const handleSubmit = (event) => {
@@ -114,7 +113,6 @@ function AddTrainee() {
         }, 3000);
       })
       .catch((error) => {
-        console.log(trainee_name, join_date);
         console.error("Error creating trainee:", error);
       });
   };
@@ -130,9 +128,9 @@ function AddTrainee() {
         data-sidebar-position="fixed"
         data-header-position="fixed"
       >
-        <Nav></Nav>
+        <Nav />
         <div className="body-wrapper">
-          <Header></Header>
+          <Header />
           <div className="container-fluid">
             <div className="container-fluid">
               <div className="card">
@@ -186,13 +184,6 @@ function AddTrainee() {
                             />
                           </DemoContainer>
                         </LocalizationProvider>
-
-                        {error && (
-                          <Alert severity="error" sx={{ width: "100%" }}>
-                            {error}
-                          </Alert>
-                        )}
-
                         <TextField
                           id="trainee-employment"
                           label="Trainee Employment"
@@ -203,6 +194,11 @@ function AddTrainee() {
                           }
                           sx={{ width: "300px" }}
                         />
+                        {error && (
+                          <Alert severity="error" sx={{ width: "100%" }}>
+                            {error}
+                          </Alert>
+                        )}
                         <button
                           type="submit"
                           className="btn btn-danger w-100 py-8 fs-4 rounded-2"

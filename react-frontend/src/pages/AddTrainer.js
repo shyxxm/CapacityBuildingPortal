@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Nav from "../components/NavBar";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import axios from "axios";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
@@ -17,9 +17,9 @@ import Papa from "papaparse";
 function AddTrainer() {
   const [trainerData, setTrainerData] = useState([]);
   const [trainer_name, setTrainerName] = useState("");
-  const [start_date, setStartDate] = React.useState(dayjs());
-  const [end_date, setEndDate] = React.useState(dayjs());
-  const [open, setOpen] = React.useState(false);
+  const [start_date, setStartDate] = useState(dayjs());
+  const [end_date, setEndDate] = useState(dayjs());
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -74,21 +74,21 @@ function AddTrainer() {
       return;
     }
 
-    trainerData.forEach((trainer) => {
-      const { trainer_name, start_date, end_date } = trainer;
-      axios
-        .post("/add_trainer", { trainer_name, start_date, end_date })
-        .then((response) => {
-          console.log("Trainers created successfully:", response.data);
-        })
-        .catch((error) => {
-          console.error("Error creating Trainer:", error);
-        });
-    });
-    handleClick();
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 3000);
+    const requests = trainerData.map((trainer) =>
+      axios.post("/add_trainer", trainer)
+    );
+
+    Promise.all(requests)
+      .then((responses) => {
+        console.log("Trainers created successfully:", responses);
+        handleClick();
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 3000);
+      })
+      .catch((error) => {
+        console.error("Error creating trainers:", error);
+      });
   };
 
   const handleSubmit = (event) => {
@@ -107,8 +107,7 @@ function AddTrainer() {
         }, 3000);
       })
       .catch((error) => {
-        console.log(trainer_name, start_date, end_date);
-        console.error("Error creating manager:", error);
+        console.error("Error creating trainer:", error);
       });
   };
 

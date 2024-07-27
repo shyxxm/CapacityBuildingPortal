@@ -15,7 +15,7 @@ def analyze_sentiment(text):
 
     # Define the prompt template
     prompt = (
-        f"Perform sentiment analysis on the following text, indicating whether the sentiment is positive or negative.\n\n"
+        f"Perform sentiment analysis on the following text, indicating whether the sentiment is positive or negative. No Neutral. On\n\n"
         f"Text: \"{text}\"\n\n"
         f"Sentiment:"
     )

@@ -11,6 +11,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -145,15 +146,10 @@ function ProjectConfig() {
   }, []);
 
   const fetchProgramName = () => {
-    fetch("/view_program_name")
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
-      .then((programName) => {
+    axios
+      .get("/view_program_name")
+      .then((response) => {
+        const programName = response.data;
         if (programName && Array.isArray(programName.data)) {
           setProgramName(programName);
         } else {
@@ -166,15 +162,10 @@ function ProjectConfig() {
   };
 
   const fetchCenterData = (program_id) => {
-    fetch(`/view_center_data?program_id=${program_id}`)
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
-      .then((data) => {
+    axios
+      .get(`/view_center_data?program_id=${program_id}`)
+      .then((response) => {
+        const data = response.data;
         if (!Array.isArray(data)) {
           throw new Error("Data is not an array");
         }
@@ -199,15 +190,10 @@ function ProjectConfig() {
     setProject(selectedProject);
 
     // Fetch the program ID based on the selected project name
-    fetch(`/get_program_id?program_name=${selectedProject}`)
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
-      .then((programData) => {
+    axios
+      .get(`/get_program_id?program_name=${selectedProject}`)
+      .then((response) => {
+        const programData = response.data;
         if (programData && programData.program_id) {
           setSelectedProgramId(programData.program_id);
           fetchCenterData(programData.program_id); // Fetch centers for the selected program
@@ -277,15 +263,10 @@ function ProjectConfig() {
 
   const handleDeleteClick = (id) => () => {
     setRows((oldRows) => oldRows.filter((row) => row.id !== id));
-    fetch("/delete_center", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ center_id: id }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+    axios
+      .delete("/delete_center", { data: { center_id: id } })
+      .then((response) => {
+        const data = response.data;
         if (data.error) {
           console.error("Error deleting center:", data.error);
         } else {
@@ -312,22 +293,18 @@ function ProjectConfig() {
   const processRowUpdate = (newRow) => {
     const updatedRow = { ...newRow, isNew: false };
     setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    fetch(newRow.isNew ? "/add_center" : "/edit_center", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+
+    axios
+      .post(newRow.isNew ? "/add_center" : "/edit_center", {
         center_id: updatedRow.id,
         center_name: updatedRow.center_name,
         center_location: updatedRow.center_location,
         center_latitude: updatedRow.center_latitude,
         center_longitude: updatedRow.center_longitude,
         program_id: selectedProgramId,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
+      })
+      .then((response) => {
+        const data = response.data;
         if (data.error) {
           console.error("Error saving center:", data.error);
         } else {
@@ -636,10 +613,10 @@ function CourseGrid({ selectedProgramId }) {
       if (!selectedProgramId) return;
 
       try {
-        const response = await fetch(
+        const response = await axios.get(
           `/view_program_details?program_id=${selectedProgramId}`
         );
-        const data = await response.json();
+        const data = response.data;
         console.log("Program details data:", data);
 
         const transformedRows = data.centers.flatMap((center) =>
@@ -672,10 +649,10 @@ function CourseGrid({ selectedProgramId }) {
       if (!selectedProgramId) return;
 
       try {
-        const response = await fetch(
+        const response = await axios.get(
           `/view_center_data?program_id=${selectedProgramId}`
         );
-        const centerData = await response.json();
+        const centerData = response.data;
         console.log("Center data:", centerData);
 
         const allCenters = centerData.map((center) => ({
@@ -766,10 +743,10 @@ function CourseGrid({ selectedProgramId }) {
 
   const getCenterIdByName = async (centerName) => {
     try {
-      const response = await fetch(
+      const response = await axios.get(
         `/get_center_id_by_name?center_name=${centerName}`
       );
-      const data = await response.json();
+      const data = response.data;
       return data.center_id;
     } catch (error) {
       console.error("Error fetching center ID:", error);
@@ -789,21 +766,15 @@ function CourseGrid({ selectedProgramId }) {
     console.log("Row update:", updatedRow);
 
     try {
-      const response = await fetch(
+      const response = await axios.post(
         newRow.isNew ? "/add_course" : "/edit_course",
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...updatedRow,
-            program_id: selectedProgramId,
-          }),
+          ...updatedRow,
+          program_id: selectedProgramId,
         }
       );
 
-      const data = await response.json();
+      const data = response.data;
       if (data.error) {
         throw new Error(data.error);
       } else {
@@ -822,28 +793,18 @@ function CourseGrid({ selectedProgramId }) {
 
   const editCourse = async (updatedRow) => {
     try {
-      const response = await fetch("/edit_course", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          course_id: updatedRow.course_id,
-          course_name: updatedRow.course_name,
-          course_capacity: updatedRow.course_capacity,
-          course_duration: updatedRow.course_duration,
-          course_aim: updatedRow.course_aim,
-          course_start_date: updatedRow.course_start_date,
-          course_end_date: updatedRow.course_end_date,
-          center_id: updatedRow.center_id || null,
-        }),
+      const response = await axios.post("/edit_course", {
+        course_id: updatedRow.course_id,
+        course_name: updatedRow.course_name,
+        course_capacity: updatedRow.course_capacity,
+        course_duration: updatedRow.course_duration,
+        course_aim: updatedRow.course_aim,
+        course_start_date: updatedRow.course_start_date,
+        course_end_date: updatedRow.course_end_date,
+        center_id: updatedRow.center_id || null,
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to update course");
-      }
-
+      const data = response.data;
       console.log("Course updated successfully:", data);
       return data;
     } catch (error) {
@@ -855,23 +816,13 @@ function CourseGrid({ selectedProgramId }) {
   const addCourse = async (newCourse) => {
     console.log("Data being added:", newCourse);
     try {
-      const response = await fetch("/add_course", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...newCourse,
-          program_id: selectedProgramId,
-          center_id: newCourse.center_id || null,
-        }),
+      const response = await axios.post("/add_course", {
+        ...newCourse,
+        program_id: selectedProgramId,
+        center_id: newCourse.center_id || null,
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to add course");
-      }
-
+      const data = response.data;
       console.log("Course added successfully:", data);
       return {
         ...data,
@@ -885,19 +836,11 @@ function CourseGrid({ selectedProgramId }) {
 
   const deleteCourse = async (course_id) => {
     try {
-      const response = await fetch("/delete_course", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ course_id }),
+      const response = await axios.delete("/delete_course", {
+        data: { course_id },
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to delete course");
-      }
-
+      const data = response.data;
       console.log("Course deleted successfully:", data);
       return data;
     } catch (error) {
@@ -938,7 +881,6 @@ function CourseGrid({ selectedProgramId }) {
       headerName: "Course Capacity",
       type: "number",
       width: 150,
-
       editable: true,
       headerAlign: "center",
       align: "center",
@@ -1043,7 +985,6 @@ function CourseGrid({ selectedProgramId }) {
         );
       },
     },
-
     {
       headerAlign: "center",
       align: "center",

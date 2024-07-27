@@ -2,7 +2,7 @@ import React, { Fragment, useState, useEffect, useContext } from "react";
 import Header from "../components/Header";
 import Nav from "../components/NavBar";
 import { DataGrid } from "@mui/x-data-grid";
-import axios from "axios";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 import Button from "@mui/material/Button";
 import UserContext from "../services/UserContext";
 

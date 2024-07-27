@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Fragment } from "react";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 import Header from "../components/Header";
 import Nav from "../components/NavBar";
 import { App as AssessBar } from "../charts/Dashboard/Assessment.tsx";

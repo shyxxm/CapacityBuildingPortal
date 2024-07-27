@@ -12,7 +12,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
-import axios from "axios";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 import TextField from "@mui/material/TextField";
 import { Line, Bar } from "react-chartjs-2";
 import {
@@ -48,13 +48,13 @@ ChartJS.register(
 function TextAnalysis() {
   const chartRef = useRef(null);
   const [chartData, setChartData] = useState({
-    labels: [], // Initialize with empty array
+    labels: [],
     datasets: [
       {
         label: "SDG Predictions",
-        data: [], // Initialize with empty array
-        borderColor: "rgba(0, 51, 153, 1)", // Deep blue color
-        backgroundColor: "rgba(0, 153, 51, 0.5)", // Bright green color with 50% opacity
+        data: [],
+        borderColor: "rgba(0, 51, 153, 1)",
+        backgroundColor: "rgba(0, 153, 51, 0.5)",
         pointStyle: "circle",
         pointRadius: 10,
         pointHoverRadius: 15,
@@ -62,11 +62,11 @@ function TextAnalysis() {
     ],
   });
   const [barChartData, setBarChartData] = useState({
-    labels: [], // Initialize with empty array
+    labels: [],
     datasets: [
       {
         label: "Important Words",
-        data: [], // Initialize with empty array
+        data: [],
         backgroundColor: [],
         borderColor: [],
         borderWidth: 1,
@@ -107,10 +107,16 @@ function TextAnalysis() {
 
   const [extractedText, setExtractedText] = useState("");
   const [processedText, setProcessedText] = useState("");
-
-  const [fileUploaded, setFileUploaded] = useState(false); // State variable to track whether a file has been uploaded
-
-  const [type, setType] = React.useState("");
+  const [fileUploaded, setFileUploaded] = useState(false);
+  const [type, setType] = useState("");
+  const [activeStep, setActiveStep] = useState(0);
+  const [showImage, setShowImage] = useState(false);
+  const [showRow, setShowRow] = useState(false);
+  const [showgraph, setShowGraph] = useState(false);
+  const [stopSpinning, setStopSpinning] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+  const [sentiment, setSentiment] = useState("");
+  const [keyphrases, setKeyphrases] = useState([]);
 
   const handleChange = (event) => {
     setType(event.target.value);
@@ -118,39 +124,20 @@ function TextAnalysis() {
 
   const fileInputRef = useRef(null);
 
-  const [activeStep, setActiveStep] = React.useState(0);
-
-  const [showImage, setShowImage] = useState(false);
-  const [showRow, setShowRow] = useState(false);
-  const [showgraph, setShowgraph] = useState(false);
-  const [stopSpinning, setStopSpinning] = useState(false);
-  const [selectedImage, setSelectedImage] = useState("");
-  const [sentiment, setSentiment] = useState("");
-  const [keyphrases, setKeyphrases] = useState([]);
-
   const handleNext = (event) => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
 
-    // create a variable
-
-    // Check the active step and perform different actions accordingly
     if (activeStep === 0) {
-      // Trigger file upload logic when the "Next" button is clicked for step 1
       if (type === "plain_text") {
-        handlePlainTextNext(event); // Call the function for "Plain text" option
+        handlePlainTextNext(event);
       } else if (type === "whatsapp_chat") {
-        console.log("this is a whatsapp chat");
-        handleWhatsAppSubmit(event); // Call the function "WhatsApp Chat" options
+        handleWhatsAppSubmit(event);
       } else {
-        handleSubmit(event); // Call the function for "PDF"
+        handleSubmit(event);
       }
     } else if (activeStep === 1) {
-      // Handle next button action for step 2
-      // For example, call a different API or perform another action
       handleStep2Next(event);
     } else if (activeStep === 2) {
-      // Handle next button action for step 3
-      // For example, call a different API or perform another action
       // handleStep3Next(event);
     }
   };
@@ -159,9 +146,8 @@ function TextAnalysis() {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  // Function to handle "Next" button action for "Plain text" option
   const handlePlainTextNext = (event) => {
-    // Your custom logic here for "Plain text" option
+    // Custom logic for plain text
   };
 
   const handleFileChange = (event) => {
@@ -171,60 +157,40 @@ function TextAnalysis() {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
-
-    const formData = new FormData(); // Create a new FormData object
-
-    // Append file to FormData object
-    formData.append("file", fileInputRef.current.files[0]); // Assuming fileInputRef is a ref to your file input element
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append("file", fileInputRef.current.files[0]);
 
     try {
-      // Make HTTP POST request to your backend API
       const response = await axios.post("/upload_file", formData, {
         headers: {
-          "Content-Type": "multipart/form-data", // Set the content type to multipart/form-data
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      console.log("File uploaded successfully:", response.data);
-
-      // Access the extracted text from the response
       const extractedText = response.data.text;
-      console.log("Extracted text:", extractedText);
-
-      // Update the extractedText state with the extracted text
       setExtractedText(extractedText);
-
-      // Now you can use the extracted text in your React component as needed
     } catch (error) {
       console.error("Error uploading file:", error);
-      // Handle error if needed
     }
   };
 
   const handleWhatsAppSubmit = async (event) => {
     event.preventDefault();
+    const formData = new FormData();
+    formData.append("file", fileInputRef.current.files[0]);
 
     try {
-      const formData = new FormData();
-      formData.append("file", fileInputRef.current.files[0]); // Assuming fileInputRef is a ref to your file input element
-
-      // Make HTTP POST request to your backend API
       const response = await axios.post("/whatsapp_text", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      // Access the processed text from the response
       const extractedText = response.data.text;
-      console.log("Extracted text:", extractedText);
-
-      // Update the extractedText state with the extracted text
       setExtractedText(extractedText);
     } catch (error) {
       console.error("Error processing text:", error);
-      // Handle error if needed
     }
   };
 
@@ -247,55 +213,31 @@ function TextAnalysis() {
     event.preventDefault();
 
     try {
-      // Make HTTP POST request to your backend API
       const response = await axios.post("/process_text", {
         text: extractedText,
       });
-
-      // Access the processed text from the response
       const processedText = response.data.text;
-      console.log("Processed text:", processedText);
-
-      // Access the predicted sentiment from the response
-      const predicted_sentiment = response.data.sentiment;
-      console.log("Predicted sentiment:", predicted_sentiment);
-
-      // Set the predicted sentiment
-      setSentiment(predicted_sentiment);
-
-      // Access the predictions from the response
+      const predictedSentiment = response.data.sentiment;
       const predictions = response.data.predictions;
-      console.log("predictions:", predictions);
-
-      // Access the keyphrases from the response
       const importantWords = response.data.important_words.map(
         (item) => item.word
       );
       const importantWeights = response.data.important_words.map(
         (item) => item.weight
       );
-      console.log("Important Words:", importantWords);
-      console.log("Important Weights:", importantWeights);
 
-      // Set the keyphrases in your state
+      setSentiment(predictedSentiment);
       setKeyphrases(importantWords);
 
-      // Sort predictions by score in descending order
       const sortedPredictions = predictions.sort((a, b) => b.score - a.score);
-
-      console.log("Sorted Predictions:", sortedPredictions);
-
-      // Select the image based on the highest prediction score
       const selectedImageKey = sortedPredictions[0].label;
-      console.log(selectedImageKey);
-      setSelectedImage(selectedImageKey); // Set the selected image key
 
-      setShowgraph(true);
+      setSelectedImage(selectedImageKey);
+      setShowGraph(true);
       setShowImage(true);
       setShowRow(true);
       setStopSpinning(true);
 
-      // Update chartData state with new sorted labels and data
       setChartData({
         labels: sortedPredictions.map(
           (prediction) => `SDG ${prediction.label}`
@@ -304,8 +246,8 @@ function TextAnalysis() {
           {
             label: "SDG Predictions",
             data: sortedPredictions.map((prediction) => prediction.score),
-            borderColor: "rgba(0, 51, 153, 1)", // Deep blue color
-            backgroundColor: "rgba(0, 153, 51, 0.5)", // Bright green color with 50% opacity
+            borderColor: "rgba(0, 51, 153, 1)",
+            backgroundColor: "rgba(0, 153, 51, 0.5)",
             pointStyle: "circle",
             pointRadius: 10,
             pointHoverRadius: 15,
@@ -313,16 +255,14 @@ function TextAnalysis() {
         ],
       });
 
-      // Generate colors based on the number of important words
       const colors = generateColors(importantWords.length);
 
-      // Set chart data for important words bar chart
       const barChartData = {
-        labels: importantWords.slice(0, 10), // Limit to 10 words
+        labels: importantWords.slice(0, 10),
         datasets: [
           {
             label: "Important Words",
-            data: importantWeights.slice(0, 10), // Limit to 10 weights
+            data: importantWeights.slice(0, 10),
             backgroundColor: colors,
             borderColor: generateBorderColors(colors),
             borderWidth: 1,
@@ -332,7 +272,6 @@ function TextAnalysis() {
       setBarChartData(barChartData);
     } catch (error) {
       console.error("Error processing text:", error);
-      // Handle error if needed
     }
   };
 

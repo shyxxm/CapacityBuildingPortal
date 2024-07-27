@@ -17,6 +17,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 
 const columns = [
   {
@@ -122,17 +123,19 @@ function ViewManager() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const fetchData = () => {
-    fetch("/view_managers_sort")
-      .then((res) => res.json())
+    axios
+      .get("/view_managers_sort")
       .then((response) => {
-        const data = response.data.map((item) => ({
+        const data = response.data.data; // Extract the data array from the response
+        console.log("Received data:", data);
+        // Transform the data into an array of objects with unique IDs
+        const transformedData = data.map((item) => ({
           id: item[0], // Use the manager_id as the unique id
           manager_id: item[0],
           manager_name: item[1],
           manager_username: item[2],
         }));
-        setChartData(data);
-        console.log("Fetched data:", data);
+        setChartData(transformedData);
       })
       .catch((error) => console.error("Error fetching data:", error));
   };
@@ -152,22 +155,13 @@ function ViewManager() {
     console.log("Deleting rows:", selectedRows);
 
     selectedRows.forEach((manager_id) => {
-      fetch(`/delete_manager`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ manager_id }),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
+      axios
+        .delete("/delete_manager", {
+          data: { manager_id },
         })
-        .then((data) => {
-          if (data.error) {
-            console.error("Error deleting manager:", data.error);
+        .then((response) => {
+          if (response.data.error) {
+            console.error("Error deleting manager:", response.data.error);
           } else {
             console.log("Manager deleted successfully:", manager_id);
           }
@@ -201,17 +195,11 @@ function ViewManager() {
     console.log("Saving edited manager:", formData);
 
     // Call the backend API to update the manager
-    fetch(`/edit_manager`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          console.error("Error updating manager:", data.error);
+    axios
+      .put("/edit_manager", formData)
+      .then((response) => {
+        if (response.data.error) {
+          console.error("Error updating manager:", response.data.error);
         } else {
           console.log("Manager updated successfully:", formData.manager_id);
           // Update the frontend state to reflect the changes

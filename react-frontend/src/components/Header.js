@@ -10,7 +10,7 @@ import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
-import axios from "axios";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 import { useNavigate } from "react-router-dom";
 import UserContext from "../services/UserContext";
 
@@ -22,7 +22,7 @@ function Header() {
 
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [anchorElNotifications, setAnchorElNotifications] = useState(null);
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState([]); // Initialize as an empty array
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);

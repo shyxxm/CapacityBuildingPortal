@@ -20,6 +20,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 
 const columns = [
   {
@@ -140,16 +141,10 @@ function ViewTrainee() {
 
   // function to fetch data
   const fetchData = () => {
-    fetch("/view_trainees_sort")
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error("Server response not OK");
-        }
-      })
+    axios
+      .get("/view_trainees_sort")
       .then((response) => {
-        const data = response.data; // Extract the data array from the response
+        const data = response.data.data; // Extract the data array from the response
         console.log("Received data:", data);
         // Transform the data into an array of objects with unique IDs
         const transformedData = data.map((item, index) => ({
@@ -171,10 +166,10 @@ function ViewTrainee() {
   };
 
   const fetchProgramsCourses = () => {
-    fetch("/view_programs_courses")
-      .then((res) => res.json())
+    axios
+      .get("/view_programs_courses")
       .then((response) => {
-        setProgramsCourses(response.programs_courses);
+        setProgramsCourses(response.data.programs_courses);
       })
       .catch((error) => {
         console.error("Error fetching programs and courses:", error);
@@ -203,17 +198,13 @@ function ViewTrainee() {
 
     // Call the delete API for each selected row
     selectedRows.forEach((id) => {
-      fetch(`/delete_trainee`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ trainee_id: id }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.error) {
-            console.error("Error deleting trainee:", data.error);
+      axios
+        .delete("/delete_trainee", {
+          data: { trainee_id: id },
+        })
+        .then((response) => {
+          if (response.data.error) {
+            console.error("Error deleting trainee:", response.data.error);
           } else {
             console.log("Trainee deleted successfully:", id);
           }
@@ -279,17 +270,11 @@ function ViewTrainee() {
     console.log("Saving edited trainee:", formData);
 
     // Call the backend API to update the trainee
-    fetch(`/edit_trainee`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          console.error("Error updating trainee:", data.error);
+    axios
+      .put("/edit_trainee", formData)
+      .then((response) => {
+        if (response.data.error) {
+          console.error("Error updating trainee:", response.data.error);
         } else {
           // Refresh data after updating
           fetchData();

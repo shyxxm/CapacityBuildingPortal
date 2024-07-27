@@ -11,9 +11,9 @@ import {
 import { Bar } from "react-chartjs-2";
 import { ChartOptions } from "chart.js";
 
-// import axios from '../../services/axiosConfig';
+import axios from "../../services/axiosConfig";
 
-import axios from "axios";
+// import axios from "axios";
 
 ChartJS.register(
   CategoryScale,

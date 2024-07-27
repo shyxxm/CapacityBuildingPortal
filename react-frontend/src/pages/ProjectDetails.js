@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import axios from "axios";
+import axios from "../services/axiosConfig"; // Import the configured Axios instance
 
 const Progress = ["Red", "Yellow", "Green"];
 
